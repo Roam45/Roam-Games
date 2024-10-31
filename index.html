@@ -22,13 +22,13 @@
         }
         #garden {
             border: 2px solid green;
-            padding: 10px;
             width: 100%; /* Use full width of container */
             height: 300px; /* Increased height of the garden */
             background-color: #e0f7fa;
             position: relative;
             overflow: hidden;
             margin: 0 auto; /* Center the garden */
+            box-sizing: border-box; /* Include padding in width */
         }
         .plant {
             position: absolute;
@@ -240,6 +240,7 @@
 
         document.getElementById('buySeedsButton').addEventListener('click', function() {
             if (money >= seedPrice) {
+                plantCount++;
                 money -= seedPrice;
                 document.getElementById('money').innerText = money;
                 document.getElementById('seedCount').innerText = plantCount;
