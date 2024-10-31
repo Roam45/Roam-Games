@@ -270,7 +270,7 @@
                     do {
                         overlapping = false;
                         newLeft = Math.random() * (garden.clientWidth - fenceWidth);
-                        
+
                         for (let fence of fences) {
                             const fenceRect = fence.getBoundingClientRect();
                             if (newLeft < fenceRect.left + fenceWidth && newLeft + fenceWidth > fenceRect.left) {
@@ -305,9 +305,7 @@
             }
         });
 
-        window.onload = loadProgress;
-
-        // Coin Flip Game Variables
+        // Coin Flip Game Logic
         let balance = 100; // Starting balance
 
         function placeBet(choice) {
@@ -319,7 +317,7 @@
 
             const coinFlip = Math.random() < 0.5 ? 'heads' : 'tails';
             const resultDiv = document.getElementById('result');
-            
+
             if (coinFlip === choice) {
                 balance += betAmount;
                 resultDiv.innerHTML = `You won! The coin landed on ${coinFlip}. Your new balance is $${balance}.`;
