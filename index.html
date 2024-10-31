@@ -72,20 +72,7 @@
         const fenceWidth = 30;
         let fences = [];
 
-        // Cookie functions
-        function setCookie(name, value, days) {
-            const expires = new Date(Date.now() + days * 864e5).toUTCString();
-            document.cookie = name + '=' + encodeURIComponent(value) + '; expires=' + expires + '; path=/';
-        }
-
-        function getCookie(name) {
-            return document.cookie.split('; ').reduce((r, c) => {
-                const [key, v] = c.split('=');
-                return key === name ? decodeURIComponent(v) : r;
-            }, '');
-        }
-
-        // Save progress to cookies
+        // Save progress to localStorage
         function saveProgress() {
             const progress = {
                 plantCount,
@@ -96,12 +83,12 @@
                     left: fence.style.left
                 }))
             };
-            setCookie('gardenGameProgress', JSON.stringify(progress), 7); // Save for 7 days
+            localStorage.setItem('gardenGameProgress', JSON.stringify(progress)); // Save in localStorage
         }
 
-        // Load progress from cookies
+        // Load progress from localStorage
         function loadProgress() {
-            const savedProgress = getCookie('gardenGameProgress');
+            const savedProgress = localStorage.getItem('gardenGameProgress');
             if (savedProgress) {
                 const progress = JSON.parse(savedProgress);
                 plantCount = progress.plantCount;
