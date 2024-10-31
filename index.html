@@ -14,13 +14,17 @@
         .game-container {
             display: none; /* Hide all games initially */
             margin: 20px auto; /* Center the game containers */
-            max-width: 320px; /* Limit the width of the game containers */
+            max-width: 400px; /* Increased width of the game containers */
+            border: 2px solid #ccc; /* Added border to the containers */
+            border-radius: 10px; /* Rounded corners for better aesthetics */
+            padding: 20px; /* Added padding */
+            background-color: #f9f9f9; /* Light background for the containers */
         }
         #garden {
             border: 2px solid green;
             padding: 10px;
-            width: 300px;
-            height: 200px;
+            width: 100%; /* Use full width of container */
+            height: 300px; /* Increased height of the garden */
             background-color: #e0f7fa;
             position: relative;
             overflow: hidden;
@@ -71,6 +75,7 @@
 </head>
 <body>
     <h1>Welcome to the Games</h1>
+    
     <div class="game-container" id="gardenGame">
         <h2>The Garden Game</h2>
         <div id="garden"></div>
@@ -244,7 +249,7 @@
 
         document.getElementById('sellSeedsButton').addEventListener('click', function() {
             if (plantCount > 0) {
-                const sellPrice = plantCount === 1 ? 1 : Math.floor(seedPrice / 2);
+                const sellPrice = seedPrice / 2;
                 money += sellPrice * plantCount;
                 document.getElementById('money').innerText = money;
                 document.getElementById('message').innerText = `You sold all ${plantCount} seeds for $${sellPrice * plantCount}!`;
