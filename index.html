@@ -18,24 +18,25 @@
         .game-container {
             display: none; /* Hide all games initially */
             margin: 20px;
-            max-width: 400px; /* Increased width of the game containers */
-            border: 2px solid #ccc; /* Added border to the containers */
-            border-radius: 10px; /* Rounded corners for better aesthetics */
-            padding: 20px; /* Added padding */
-            background-color: #f9f9f9; /* Light background for the containers */
+            max-width: 400px; /* Width of the game container */
+            border: 2px solid #ccc; /* Border for the containers */
+            border-radius: 10px; /* Rounded corners */
+            padding: 20px; /* Padding for the container */
+            background-color: #f9f9f9; /* Light background */
+            position: relative; /* Relative positioning for inner elements */
         }
         #garden {
             border: 2px solid green;
-            width: 100%; /* Use full width of container */
-            height: 300px; /* Increased height of the garden */
+            width: 100%; /* Full width of the container */
+            height: 300px; /* Height of the garden */
             background-color: #e0f7fa;
             position: relative;
             overflow: hidden;
-            margin: 0 auto; /* Center the garden */
-            display: flex; /* Added flexbox to center children */
+            display: flex; /* Flexbox to center children */
             justify-content: center; /* Center horizontally */
             align-items: flex-end; /* Align plants at the bottom */
-            padding: 10px; /* Add padding */
+            padding: 10px; /* Padding */
+            margin-bottom: 20px; /* Space between garden and bank */
         }
         .plant {
             position: absolute;
@@ -75,8 +76,12 @@
             border: 2px solid #ccc;
             border-radius: 10px;
             padding: 10px;
-            margin-top: 20px;
             background-color: #f0f0f0;
+            max-width: 200px; /* Fixed width for bank container */
+        }
+        .game-wrapper {
+            display: flex; /* Flexbox to arrange garden and bank side by side */
+            align-items: flex-start; /* Align items at the top */
         }
     </style>
 </head>
@@ -89,7 +94,20 @@
 
     <div class="game-container" id="gardenGame">
         <h2>The Garden Game</h2>
-        <div id="garden"></div>
+        <div class="game-wrapper"> <!-- New wrapper for garden and bank -->
+            <div id="garden"></div>
+            <div class="bank-container">
+                <h3>Bank</h3>
+                <p>Level: <span id="bankLevel">1</span></p>
+                <p>Storage Capacity: $<span id="storageCapacity">100</span></p>
+                <p>Stored Money: $<span id="storedMoney">0</span></p>
+                <p>Insurance: <span id="insuranceStatus">Not Purchased</span></p>
+                <button id="depositButton">Deposit Money</button>
+                <button id="levelUpButton">Level Up Bank ($<span id="levelUpCost">50</span>)</button>
+                <button id="buyInsuranceButton">Buy Insurance ($<span id="insuranceCost">10</span>)</button>
+                <p id="bankMessage"></p>
+            </div>
+        </div>
         <button id="plantButton">Plant a Seed</button>
         <button id="buySeedsButton">Buy Seeds ($<span id="seedPrice">1</span>)</button>
         <button id="sellSeedsButton">Sell Seeds</button>
@@ -97,18 +115,6 @@
         <p id="message"></p>
         <p>Seeds Planted: <span id="seedCount">0</span></p>
         <p>Money: $<span id="money">10</span></p>
-
-        <div class="bank-container">
-            <h3>Bank</h3>
-            <p>Level: <span id="bankLevel">1</span></p>
-            <p>Storage Capacity: $<span id="storageCapacity">100</span></p>
-            <p>Stored Money: $<span id="storedMoney">0</span></p>
-            <p>Insurance: <span id="insuranceStatus">Not Purchased</span></p>
-            <button id="depositButton">Deposit Money</button>
-            <button id="levelUpButton">Level Up Bank ($<span id="levelUpCost">50</span>)</button>
-            <button id="buyInsuranceButton">Buy Insurance ($<span id="insuranceCost">10</span>)</button>
-            <p id="bankMessage"></p>
-        </div>
     </div>
 
     <div class="game-container" id="coinFlipGame">
@@ -212,14 +218,15 @@
                 enemy.style.top = (document.getElementById('garden').clientHeight - 30) + 'px';
 
                 const checkCollision = () => {
+                    const fenceRects = fences.map(fence => fence.getBoundingClientRect());
+                    const enemyRect = enemy.getBoundingClientRect();
                     let collision = false;
-                    fences.forEach(fence => {
-                        const fenceRect = fence.getBoundingClientRect();
-                        const enemyRect = enemy.getBoundingClientRect();
-                        if (enemyRect.bottom >= fenceRect.top && 
-                            enemyRect.top <= fenceRect.bottom &&
-                            enemyRect.left + enemyRect.width >= fenceRect.left && 
-                            enemyRect.left <= fenceRect.left + fenceRect.width) {
+
+                    fenceRects.forEach(fenceRect => {
+                        if (enemyRect.left < fenceRect.left + fenceRect.width &&
+                            enemyRect.left + enemyRect.width > fenceRect.left &&
+                            enemyRect.top < fenceRect.top + fenceRect.height &&
+                            enemyRect.top + enemyRect.height > fenceRect.top) {
                             collision = true;
                         }
                     });
