@@ -31,6 +31,7 @@
             display: flex; /* Added flexbox to center children */
             justify-content: center; /* Center horizontally */
             align-items: flex-end; /* Align plants at the bottom */
+            padding: 10px; /* Add padding */
         }
         .plant {
             position: absolute;
@@ -222,25 +223,6 @@
         setInterval(() => attackGarden(true), 40000);
 
         document.getElementById('plantButton').addEventListener('click', function() {
-            plantCount++;
-            const garden = document.getElementById('garden');
-            const newPlant = document.createElement('div');
-            newPlant.className = 'plant';
-            newPlant.style.left = Math.random() * (garden.clientWidth - 50) + 'px';
-            newPlant.style.transform = 'scale(0.5)';
-            newPlant.innerText = '🌱';
-            garden.appendChild(newPlant);
-
-            setTimeout(() => {
-                newPlant.style.transform = 'scale(1)';
-            }, 100);
-
-            document.getElementById('message').innerText = `You have planted ${plantCount} seeds!`;
-            document.getElementById('seedCount').innerText = plantCount;
-            saveProgress();
-        });
-
-        document.getElementById('buySeedsButton').addEventListener('click', function() {
             if (money >= seedPrice) {
                 money -= seedPrice;
                 plantCount++;
