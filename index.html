@@ -23,16 +23,40 @@
             overflow: hidden;
         }
         #gardenGame {
-            background-image: url('data:image/svg+xml;utf8,%F0%9F%8C%B1%F0%9F%9A%9B%20%20%F0%9F%9A%9B%F0%9F%8C%B1'); /* 🌱⚔️ */
-            background-size: cover;
+            position: relative;
+        }
+        #gardenGame::before {
+            content: "🌱⚔️";
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 50px;
+            opacity: 0.5;
+            pointer-events: none;
         }
         #coinFlipGame {
-            background-image: url('data:image/svg+xml;utf8,%F0%9F%8E%B0%F0%9F%AA%99'); /* 🎰🪙 */
-            background-size: cover;
+            position: relative;
+        }
+        #coinFlipGame::before {
+            content: "🎰🪙";
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 50px;
+            opacity: 0.5;
+            pointer-events: none;
         }
         #clickerGame {
-            background-image: url('data:image/svg+xml;utf8,%F0%9F%96%B1'); /* 🖱️ */
-            background-size: cover;
+            position: relative;
+        }
+        #clickerGame::before {
+            content: "🖱️";
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 50px;
+            opacity: 0.5;
+            pointer-events: none;
         }
         #garden {
             border: 2px solid green;
