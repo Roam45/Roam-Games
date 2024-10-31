@@ -241,10 +241,8 @@
         document.getElementById('buySeedsButton').addEventListener('click', function() {
             if (money >= seedPrice) {
                 money -= seedPrice;
-                plantCount++;
                 document.getElementById('money').innerText = money;
                 document.getElementById('seedCount').innerText = plantCount;
-                document.getElementById('message').innerText = `You bought a seed!`;
                 saveProgress();
             } else {
                 document.getElementById('message').innerText = `Not enough money to buy seeds.`;
@@ -253,18 +251,10 @@
 
         document.getElementById('sellSeedsButton').addEventListener('click', function() {
             if (plantCount > 0) {
-                const sellPrice = seedPrice / 2;
-                money += sellPrice * plantCount;
-                document.getElementById('money').innerText = money;
-                document.getElementById('message').innerText = `You sold all ${plantCount} seeds for $${sellPrice * plantCount}!`;
-
-                const garden = document.getElementById('garden');
-                const plants = garden.getElementsByClassName('plant');
-                while (plants.length > 0) {
-                    plants[0].remove();
-                }
-                plantCount = 0;
+                plantCount--;
+                money++;
                 document.getElementById('seedCount').innerText = plantCount;
+                document.getElementById('money').innerText = money;
                 saveProgress();
             } else {
                 document.getElementById('message').innerText = `No seeds to sell.`;
@@ -272,73 +262,37 @@
         });
 
         document.getElementById('buyFenceButton').addEventListener('click', function() {
-            if (money >= fencePrice) {
-                if (fences.length < maxFences) {
-                    const garden = document.getElementById('garden');
-                    let newLeft;
-
-                    let overlapping;
-                    do {
-                        overlapping = false;
-                        newLeft = Math.random() * (garden.clientWidth - fenceWidth);
-
-                        for (let fence of fences) {
-                            const fenceRect = fence.getBoundingClientRect();
-                            if (newLeft < fenceRect.left + fenceWidth && newLeft + fenceWidth > fenceRect.left) {
-                                overlapping = true;
-                                break;
-                            }
-                        }
-                    } while (overlapping);
-
-                    money -= fencePrice;
-                    document.getElementById('money').innerText = money;
-
-                    const newFence = document.createElement('div');
-                    newFence.className = 'fence';
-                    newFence.style.left = newLeft + 'px';
-                    garden.appendChild(newFence);
-                    fences.push(newFence);
-
-                    document.getElementById('message').innerText = `You bought a wooden fence!`;
-                    saveProgress();
-
-                    setTimeout(() => {
-                        newFence.remove();
-                        fences = fences.filter(fence => fence !== newFence);
-                        saveProgress();
-                    }, 30000);
-                } else {
-                    document.getElementById('message').innerText = `You can't buy more than ${maxFences} fences.`;
-                }
+            if (money >= fencePrice && fences.length < maxFences) {
+                money -= fencePrice;
+                const newFence = document.createElement('div');
+                newFence.className = 'fence';
+                newFence.style.left = Math.random() * (document.getElementById('garden').clientWidth - fenceWidth) + 'px';
+                document.getElementById('garden').appendChild(newFence);
+                fences.push(newFence);
+                document.getElementById('money').innerText = money;
+                saveProgress();
             } else {
-                document.getElementById('message').innerText = `Not enough money to buy a fence.`;
+                document.getElementById('message').innerText = `Not enough money or fence limit reached.`;
             }
         });
 
         // Coin Flip Game Logic
-        let balance = 100; // Starting balance for Coin Flip Game
-
         function placeBet(choice) {
             const betAmount = parseInt(document.getElementById('betAmount').value);
-            if (isNaN(betAmount) || betAmount <= 0 || betAmount > balance) {
-                alert("Please enter a valid bet amount.");
+            let balance = parseInt(document.getElementById('coinBalance').innerText);
+            if (betAmount > balance || betAmount <= 0) {
+                document.getElementById('result').innerText = 'Invalid bet amount!';
                 return;
             }
-
-            const coinFlip = Math.random() < 0.5 ? 'heads' : 'tails';
-            const resultDiv = document.getElementById('result');
-
-            if (coinFlip === choice) {
+            const outcome = Math.random() < 0.5 ? 'heads' : 'tails';
+            if (choice === outcome) {
                 balance += betAmount;
-                resultDiv.innerHTML = `You won! The coin landed on ${coinFlip}. Your new balance is $${balance}.`;
+                document.getElementById('result').innerText = `You won! The coin landed on ${outcome}.`;
             } else {
                 balance -= betAmount;
-                resultDiv.innerHTML = `You lost! The coin landed on ${coinFlip}. Your new balance is $${balance}.`;
+                document.getElementById('result').innerText = `You lost! The coin landed on ${outcome}.`;
             }
-
-            document.getElementById('betAmount').value = ''; // Clear input
-            document.getElementById('coinBalance').innerText = balance; // Update balance display
+            document.getElementById('coinBalance').innerText = balance;
         }
 
         // Clicker Game Logic
@@ -368,6 +322,7 @@
             document.getElementById('gardenGame').style.display = 'block';
             document.getElementById('coinFlipGame').style.display = 'none';
             document.getElementById('clickerGame').style.display = 'none';
+            loadProgress(); // Load garden progress
         });
 
         document.getElementById('toggleCoinFlip').addEventListener('click', function() {
@@ -383,7 +338,7 @@
         });
 
         // Load progress on page load
-        window.onload = loadProgress;
+        loadProgress();
     </script>
 </body>
 </html>
