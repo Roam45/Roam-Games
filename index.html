@@ -9,6 +9,7 @@
             font-family: Arial, sans-serif;
             background-color: #ffffff;
             display: flex;
+            flex-direction: column; /* Column layout for stacking */
             justify-content: center;
             align-items: center;
             min-height: 100vh; /* Full viewport height */
@@ -18,7 +19,7 @@
         .game-container {
             display: none; /* Hide all games initially */
             margin: 20px;
-            max-width: 400px; /* Width of the game container */
+            max-width: 800px; /* Increased width for the game container */
             border: 2px solid #ccc; /* Border for the containers */
             border-radius: 10px; /* Rounded corners */
             padding: 20px; /* Padding for the container */
@@ -28,7 +29,7 @@
         #garden {
             border: 2px solid green;
             width: 100%; /* Full width of the container */
-            height: 300px; /* Height of the garden */
+            height: 400px; /* Increased height of the garden */
             background-color: #e0f7fa;
             position: relative;
             overflow: hidden;
@@ -78,6 +79,7 @@
             padding: 10px;
             background-color: #f0f0f0;
             max-width: 200px; /* Fixed width for bank container */
+            margin-left: 20px; /* Space between garden and bank */
         }
         .game-wrapper {
             display: flex; /* Flexbox to arrange garden and bank side by side */
@@ -94,7 +96,7 @@
 
     <div class="game-container" id="gardenGame">
         <h2>The Garden Game</h2>
-        <div class="game-wrapper"> <!-- New wrapper for garden and bank -->
+        <div class="game-wrapper"> <!-- Wrapper for garden and bank -->
             <div id="garden"></div>
             <div class="bank-container">
                 <h3>Bank</h3>
@@ -215,36 +217,35 @@
             document.getElementById('garden').appendChild(enemy);
 
             setTimeout(() => {
-                enemy.style.top = (document.getElementById('garden').clientHeight - 30) + 'px';
-
-                const checkCollision = () => {
-                    const fenceRects = fences.map(fence => fence.getBoundingClientRect());
-                    const enemyRect = enemy.getBoundingClientRect();
-                    let collision = false;
-
-                    fenceRects.forEach(fenceRect => {
-                        if (enemyRect.left < fenceRect.left + fenceRect.width &&
-                            enemyRect.left + enemyRect.width > fenceRect.left &&
-                            enemyRect.top < fenceRect.top + fenceRect.height &&
-                            enemyRect.top + enemyRect.height > fenceRect.top) {
-                            collision = true;
-                        }
-                    });
-
-                    if (collision) {
-                        if (isPoisonEnemy) {
-                            alert("Your garden has been attacked by a poison enemy!");
-                        } else {
-                            alert("Your garden has been attacked by an enemy!");
-                        }
-                        enemy.remove();
-                    } else {
-                        requestAnimationFrame(checkCollision);
-                    }
-                };
-
-                requestAnimationFrame(checkCollision);
+                enemy.style.top = document.getElementById('garden').clientHeight + 'px';
+                checkCollision(enemy, isPoisonEnemy);
             }, 1000);
+        }
+
+        function checkCollision(enemy, isPoisonEnemy) {
+            const fenceRects = fences.map(fence => fence.getBoundingClientRect());
+            const enemyRect = enemy.getBoundingClientRect();
+            let collision = false;
+
+            fenceRects.forEach(fenceRect => {
+                if (enemyRect.left < fenceRect.left + fenceRect.width &&
+                    enemyRect.left + enemyRect.width > fenceRect.left &&
+                    enemyRect.top < fenceRect.top + fenceRect.height &&
+                    enemyRect.top + enemyRect.height > fenceRect.top) {
+                    collision = true;
+                }
+            });
+
+            if (collision) {
+                if (isPoisonEnemy) {
+                    alert("Your garden has been attacked by a poison enemy!");
+                } else {
+                    alert("Your garden has been attacked by an enemy!");
+                }
+                enemy.remove();
+            } else {
+                requestAnimationFrame(() => checkCollision(enemy, isPoisonEnemy));
+            }
         }
 
         function plantSeed() {
