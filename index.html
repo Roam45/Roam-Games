@@ -9,35 +9,35 @@
             font-family: Arial, sans-serif;
             background-color: #ffffff;
             display: flex;
-            flex-direction: column; /* Column layout for stacking */
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            min-height: 100vh; /* Full viewport height */
+            min-height: 100vh;
             text-align: center;
             padding: 20px;
         }
         .game-container {
             display: none; /* Hide all games initially */
             margin: 20px;
-            max-width: 800px; /* Increased width for the game container */
-            border: 2px solid #ccc; /* Border for the containers */
-            border-radius: 10px; /* Rounded corners */
-            padding: 20px; /* Padding for the container */
-            background-color: #f9f9f9; /* Light background */
-            position: relative; /* Relative positioning for inner elements */
+            max-width: 800px;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            position: relative;
         }
         #garden {
             border: 2px solid green;
-            width: 100%; /* Full width of the container */
-            height: 400px; /* Height of the garden */
+            width: 100%;
+            height: 400px;
             background-color: #e0f7fa;
             position: relative;
             overflow: hidden;
-            display: flex; /* Flexbox to center children */
-            justify-content: center; /* Center horizontally */
-            align-items: flex-end; /* Align plants at the bottom */
-            padding: 10px; /* Padding */
-            margin-bottom: 20px; /* Space between garden and bank */
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            padding: 10px;
+            margin-bottom: 20px;
         }
         .plant {
             position: absolute;
@@ -78,16 +78,16 @@
             border-radius: 10px;
             padding: 10px;
             background-color: #f0f0f0;
-            max-width: 200px; /* Fixed width for bank container */
-            margin-left: 20px; /* Space between garden and bank */
+            max-width: 200px;
+            margin-left: 20px;
         }
         .game-wrapper {
-            display: flex; /* Flexbox to arrange garden and bank side by side */
-            align-items: flex-start; /* Align items at the top */
-            justify-content: center; /* Center horizontally */
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
         }
         .game-header {
-            margin-bottom: 20px; /* Space below the header */
+            margin-bottom: 20px;
         }
     </style>
 </head>
@@ -101,7 +101,7 @@
 
     <div class="game-container" id="gardenGame">
         <h2>The Garden Game</h2>
-        <div class="game-wrapper"> <!-- Wrapper for garden and bank -->
+        <div class="game-wrapper">
             <div id="garden"></div>
             <div class="bank-container">
                 <h3>Bank</h3>
@@ -144,6 +144,9 @@
         <button id="buyUpgradeButton">Buy Upgrade (Points per Click: <span id="pointsPerClick">1</span>)</button>
         <p id="clickerMessage"></p>
     </div>
+
+    <!-- Reset Button -->
+    <button id="resetButton">Reset All Game Data</button>
 
     <script>
         // Garden Game Variables
@@ -403,6 +406,31 @@
             }
         }
 
+        // Reset game data
+        function resetGameData() {
+            localStorage.removeItem('gardenGameProgress');
+            // Reset all variables to initial values
+            plantCount = 0;
+            money = 10;
+            seedPrice = 1;
+            fencePrice = 5;
+            bankLevel = 1;
+            storageCapacity = 100;
+            storedMoney = 0;
+            insuranceActive = false;
+
+            // Update UI
+            document.getElementById('seedCount').innerText = plantCount;
+            document.getElementById('money').innerText = money;
+            document.getElementById('seedPrice').innerText = seedPrice;
+            document.getElementById('bankLevel').innerText = bankLevel;
+            document.getElementById('storageCapacity').innerText = storageCapacity;
+            document.getElementById('storedMoney').innerText = storedMoney;
+            document.getElementById('insuranceStatus').innerText = "Not Purchased";
+            document.getElementById('garden').innerHTML = ''; // Clear garden
+            fences = []; // Clear fences
+        }
+
         // Event Listeners
         document.getElementById('toggleGarden').addEventListener('click', () => {
             document.querySelectorAll('.game-container').forEach(container => container.style.display = 'none');
@@ -429,6 +457,7 @@
         document.getElementById('buyInsuranceButton').addEventListener('click', buyInsurance);
         document.getElementById('clickButton').addEventListener('click', clickButton);
         document.getElementById('buyUpgradeButton').addEventListener('click', buyUpgrade);
+        document.getElementById('resetButton').addEventListener('click', resetGameData);
     </script>
 </body>
 </html>
