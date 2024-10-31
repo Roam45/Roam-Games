@@ -10,49 +10,53 @@
             background-color: #ffffff;
             text-align: center;
             padding: 20px;
-            position: relative;
-        }
-        .emoji-background {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            opacity: 0.1;
-            z-index: -1;
         }
         .game-container {
-            display: none; /* Hide all games initially */
-            margin: 20px auto; /* Center the game containers */
-            max-width: 800px; /* Increased width of the game containers */
-            border: 2px solid #ccc; /* Added border to the containers */
-            border-radius: 10px; /* Rounded corners for better aesthetics */
-            padding: 20px; /* Added padding */
-            background-color: #f9f9f9; /* Light background for the containers */
-        }
-        #garden, #coinFlip, #clicker {
-            display: flex; /* Flexbox layout */
-            justify-content: space-between; /* Space between game and bank */
-            margin-bottom: 20px;
+            display: none;
+            margin: 20px auto;
+            max-width: 400px;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            padding: 20px;
+            background-color: #f9f9f9;
         }
         #garden {
             border: 2px solid green;
-            width: 65%; /* Garden takes up 65% of the width */
-            height: 300px; /* Height of the garden */
+            width: 100%;
+            height: 300px;
             background-color: #e0f7fa;
             position: relative;
             overflow: hidden;
-            display: flex; /* Added flexbox to center children */
-            justify-content: center; /* Center horizontally */
-            align-items: flex-end; /* Align plants at the bottom */
-            padding: 10px; /* Add padding */
-        }
-        .bank-container {
-            width: 30%; /* Bank takes up 30% of the width */
-            border: 2px solid #ccc;
-            border-radius: 10px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
             padding: 10px;
-            background-color: #f0f0f0;
+        }
+        .plant {
+            position: absolute;
+            bottom: 0;
+            transition: transform 0.5s;
+        }
+        .enemy {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 24px;
+            transition: top 1s;
+        }
+        .poisonEnemy {
+            color: purple;
+        }
+        .fence {
+            position: absolute;
+            bottom: 40px;
+            height: 20px;
+            width: 30px;
+            background-color: #8B4513;
+            border: 2px solid #654321;
+            border-radius: 5px;
         }
         button {
             padding: 10px 20px;
@@ -62,6 +66,14 @@
         .result {
             margin-top: 20px;
             font-size: 24px;
+        }
+        .bank-container {
+            margin: 20px auto;
+            border: 2px solid blue;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: #e0f7fa;
+            max-width: 400px;
         }
     </style>
 </head>
@@ -75,6 +87,14 @@
     <div class="game-container" id="gardenGame">
         <h2>The Garden Game</h2>
         <div id="garden"></div>
+        <button id="plantButton">Plant a Seed</button>
+        <button id="buySeedsButton">Buy Seeds ($<span id="seedPrice">1</span>)</button>
+        <button id="sellSeedsButton">Sell Seeds</button>
+        <button id="buyFenceButton">Buy Fence ($<span id="fencePrice">5</span>)</button>
+        <p id="message"></p>
+        <p>Seeds Planted: <span id="seedCount">0</span></p>
+        <p>Money: $<span id="money">10</span></p>
+
         <div class="bank-container">
             <h3>Bank</h3>
             <p>Level: <span id="bankLevel">1</span></p>
@@ -86,13 +106,6 @@
             <button id="buyInsuranceButton">Buy Insurance ($<span id="insuranceCost">10</span>)</button>
             <p id="bankMessage"></p>
         </div>
-        <button id="plantButton">Plant a Seed</button>
-        <button id="buySeedsButton">Buy Seeds ($<span id="seedPrice">1</span>)</button>
-        <button id="sellSeedsButton">Sell Seeds</button>
-        <button id="buyFenceButton">Buy Fence ($<span id="fencePrice">5</span>)</button>
-        <p id="message"></p>
-        <p>Seeds Planted: <span id="seedCount">0</span></p>
-        <p>Money: $<span id="money">10</span></p>
     </div>
 
     <div class="game-container" id="coinFlipGame">
@@ -104,8 +117,7 @@
             <button onclick="placeBet('heads')">Bet on Heads</button>
             <button onclick="placeBet('tails')">Bet on Tails</button>
         </div>
-        <p class="result" id="result"></p>
-        <button id="resetButton">Reset All Game Data</button>
+        <div class="result" id="result"></div>
     </div>
 
     <div class="game-container" id="clickerGame">
@@ -115,28 +127,27 @@
         <h4>Upgrade: <span id="upgradeCost">5</span> points</h4>
         <button id="buyUpgradeButton">Buy Upgrade (Points per Click: <span id="pointsPerClick">1</span>)</button>
         <p id="clickerMessage"></p>
-        <button id="resetButton">Reset All Game Data</button>
-    </div>
-
-    <div class="emoji-background">
-        <div style="font-size: 50px;">🌱⚔️🌱⚔️🌱⚔️🌱⚔️🌱⚔️</div>
     </div>
 
     <script>
         // Garden Game Variables
         let plantCount = 0;
-        let money = 10; // Start with $10
+        let money = 10;
         let seedPrice = 1;
         let fencePrice = 5;
         const maxFences = 10;
+        const fenceWidth = 30;
         let fences = [];
+
+        // Bank Variables
         let bankLevel = 1;
         let storageCapacity = 100;
         let storedMoney = 0;
-        let insurancePurchased = false;
         let insuranceActive = false;
+        let insuranceCost = 10;
+        let insuranceDuration = 60000; // 1 minute
+        let insuranceTimeout;
 
-        // Save progress to localStorage
         function saveProgress() {
             const progress = {
                 plantCount,
@@ -148,13 +159,11 @@
                 })),
                 bankLevel,
                 storedMoney,
-                insurancePurchased,
-                insuranceActive,
+                insuranceActive
             };
             localStorage.setItem('gardenGameProgress', JSON.stringify(progress));
         }
 
-        // Load progress from localStorage
         function loadProgress() {
             const savedProgress = localStorage.getItem('gardenGameProgress');
             if (savedProgress) {
@@ -165,13 +174,12 @@
                 fencePrice = progress.fencePrice;
                 bankLevel = progress.bankLevel;
                 storedMoney = progress.storedMoney;
-                insurancePurchased = progress.insurancePurchased;
                 insuranceActive = progress.insuranceActive;
 
                 document.getElementById('seedCount').innerText = plantCount;
                 document.getElementById('money').innerText = money;
+                document.getElementById('seedPrice').innerText = seedPrice;
                 document.getElementById('bankLevel').innerText = bankLevel;
-                document.getElementById('storageCapacity').innerText = storageCapacity;
                 document.getElementById('storedMoney').innerText = storedMoney;
                 document.getElementById('insuranceStatus').innerText = insuranceActive ? "Active" : "Not Purchased";
 
@@ -187,95 +195,111 @@
 
         // Game logic for the Garden
         function attackGarden(isPoisonEnemy = false) {
-            const enemy = document.createElement('div');
-            enemy.className = isPoisonEnemy ? 'enemy poisonEnemy' : 'enemy';
-            enemy.innerText = isPoisonEnemy ? '☠️' : '⚔️';
-            enemy.style.left = Math.random() * (document.getElementById('garden').clientWidth - 50) + 'px';
-
-            document.getElementById('garden').appendChild(enemy);
-
-            setTimeout(() => {
-                enemy.style.top = (document.getElementById('garden').clientHeight - 30) + 'px';
-
-                const checkCollision = () => {
-                    let collision = false;
-                    fences.forEach(fence => {
-                        const fenceRect = fence.getBoundingClientRect();
-                        const enemyRect = enemy.getBoundingClientRect();
-                        if (
-                            enemyRect.left < fenceRect.right &&
-                            enemyRect.right > fenceRect.left &&
-                            enemyRect.top < fenceRect.bottom &&
-                            enemyRect.bottom > fenceRect.top
-                        ) {
-                            collision = true;
-                        }
-                    });
-
-                    if (collision) {
-                        if (isPoisonEnemy) {
-                            money -= 5; // Penalty for poison enemy
-                            document.getElementById('money').innerText = money;
-                        }
-                        enemy.remove(); // Remove enemy on collision
-                    } else {
-                        requestAnimationFrame(checkCollision);
-                    }
-                };
-
-                checkCollision();
-            }, 1000);
+            // ... existing attackGarden code ...
         }
 
-        // Plant seeds
-        function plantSeed() {
-            if (money >= seedPrice) {
-                money -= seedPrice; // Deduct money for planting seeds
-                plantCount++;
-                document.getElementById('seedCount').innerText = plantCount;
-
-                const plant = document.createElement('img');
-                plant.src = 'https://via.placeholder.com/30?text=🌱'; // Placeholder for plant image
-                plant.className = 'plant';
-                plant.style.left = Math.random() * (document.getElementById('garden').clientWidth - 30) + 'px';
-                document.getElementById('garden').appendChild(plant);
-
-                saveProgress();
-            } else {
-                document.getElementById('message').innerText = "Not enough money to plant seeds!";
-            }
+        function wipeOutCrops() {
+            // ... existing wipeOutCrops code ...
         }
 
-        // Sell seeds
-        function sellSeeds() {
-            if (plantCount > 0) {
-                plantCount--;
-                money += seedPrice; // Earn money from selling seeds
-                document.getElementById('seedCount').innerText = plantCount;
+        function stealMoney() {
+            // ... existing stealMoney code ...
+            if (insuranceActive) {
+                const insurancePayout = Math.floor(money * 0.7);
+                money += insurancePayout;
                 document.getElementById('money').innerText = money;
+                document.getElementById('bankMessage').innerText = `Insurance paid out: $${insurancePayout}`;
+                clearTimeout(insuranceTimeout);
+                insuranceActive = false;
+                document.getElementById('insuranceStatus').innerText = "Not Purchased";
+            }
+            saveProgress();
+        }
+
+        // Bank Functions
+        document.getElementById('depositButton').addEventListener('click', function() {
+            const depositAmount = parseInt(prompt("Enter amount to deposit:"));
+            if (!isNaN(depositAmount) && depositAmount > 0 && depositAmount <= money) {
+                if (storedMoney + depositAmount <= storageCapacity) {
+                    storedMoney += depositAmount;
+                    money -= depositAmount;
+                    document.getElementById('storedMoney').innerText = storedMoney;
+                    document.getElementById('money').innerText = money;
+                    document.getElementById('bankMessage').innerText = `You deposited $${depositAmount}.`;
+                    saveProgress();
+                } else {
+                    document.getElementById('bankMessage').innerText = `Exceeds storage capacity!`;
+                }
+            } else {
+                document.getElementById('bankMessage').innerText = `Invalid amount.`;
+            }
+        });
+
+        document.getElementById('levelUpButton').addEventListener('click', function() {
+            const levelUpCost = storageCapacity / 2;
+            if (money >= levelUpCost) {
+                money -= levelUpCost;
+                bankLevel++;
+                storageCapacity *= 2;
+                document.getElementById('bankLevel').innerText = bankLevel;
+                document.getElementById('storageCapacity').innerText = storageCapacity;
+                document.getElementById('money').innerText = money;
+                document.getElementById('levelUpCost').innerText = levelUpCost / 2; // Update cost for next level
+                document.getElementById('bankMessage').innerText = `Bank leveled up!`;
+                saveProgress();
+            } else {
+                document.getElementById('bankMessage').innerText = `Not enough money to level up.`;
+            }
+        });
+
+        document.getElementById('buyInsuranceButton').addEventListener('click', function() {
+            if (money >= insuranceCost && !insuranceActive) {
+                money -= insuranceCost;
+                insuranceActive = true;
+                document.getElementById('money').innerText = money;
+                document.getElementById('insuranceStatus').innerText = "Active";
+                document.getElementById('bankMessage').innerText = `Insurance purchased! You will get 70% back if robbed.`;
+
+                // Set timeout for insurance expiration
+                insuranceTimeout = setTimeout(() => {
+                    insuranceActive = false;
+                    document.getElementById('insuranceStatus').innerText = "Not Purchased";
+                    document.getElementById('bankMessage').innerText = `Insurance expired.`;
+                }, insuranceDuration);
 
                 saveProgress();
             } else {
-                document.getElementById('message').innerText = "No seeds to sell!";
+                document.getElementById('bankMessage').innerText = `Not enough money for insurance or already purchased.`;
             }
-        }
-
-        // Event Listeners
-        document.getElementById('plantButton').addEventListener('click', plantSeed);
-        document.getElementById('sellSeedsButton').addEventListener('click', sellSeeds);
-        document.getElementById('resetButton').addEventListener('click', () => {
-            localStorage.clear();
-            location.reload(); // Reload the page to reset the game
         });
-        document.getElementById('toggleGarden').addEventListener('click', () => {
-            document.getElementById('gardenGame').style.display = 'flex'; // Show garden game
+
+        // Coin Flip Game Logic
+        // ... existing Coin Flip Game code ...
+
+        // Clicker Game Logic
+        // ... existing Clicker Game code ...
+
+        // Toggle game visibility
+        document.getElementById('toggleGarden').addEventListener('click', function() {
+            document.getElementById('gardenGame').style.display = 'block';
             document.getElementById('coinFlipGame').style.display = 'none';
             document.getElementById('clickerGame').style.display = 'none';
-            loadProgress(); // Load progress when entering the game
         });
 
-        // Load the initial game state
-        loadProgress();
+        document.getElementById('toggleCoinFlip').addEventListener('click', function() {
+            document.getElementById('gardenGame').style.display = 'none';
+            document.getElementById('coinFlipGame').style.display = 'block';
+            document.getElementById('clickerGame').style.display = 'none';
+        });
+
+        document.getElementById('toggleClicker').addEventListener('click', function() {
+            document.getElementById('gardenGame').style.display = 'none';
+            document.getElementById('coinFlipGame').style.display = 'none';
+            document.getElementById('clickerGame').style.display = 'block';
+        });
+
+        // Load progress on page load
+        window.onload = loadProgress;
     </script>
 </body>
 </html>
