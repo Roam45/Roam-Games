@@ -56,16 +56,16 @@
 <body>
     <div id="garden"></div>
     <button id="plantButton">Plant a Seed</button>
-    <button id="buySeedsButton">Buy Better Seeds ($<span id="seedPrice">1</span>)</button>
+    <button id="buySeedsButton">Buy Seeds ($<span id="seedPrice">1</span>)</button>
     <button id="sellSeedsButton">Sell Seeds</button>
-    <button id="buyFenceButton">Buy Wooden Fence ($<span id="fencePrice">5</span>)</button>
+    <button id="buyFenceButton">Buy Fence ($<span id="fencePrice">5</span>)</button>
     <p id="message"></p>
     <p>Seeds Planted: <span id="seedCount">0</span></p>
     <p>Money: $<span id="money">10</span></p>
 
     <script>
-        let plantCount = 0;
-        let money = 10; // Start with $10
+        let plantCount = 50;
+        let money = 0; // Start with $0
         let seedPrice = 1;
         let fencePrice = 5;
         const maxFences = 10;
