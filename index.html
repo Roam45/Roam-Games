@@ -29,7 +29,7 @@
         #garden {
             border: 2px solid green;
             width: 100%; /* Full width of the container */
-            height: 400px; /* Increased height of the garden */
+            height: 400px; /* Height of the garden */
             background-color: #e0f7fa;
             position: relative;
             overflow: hidden;
@@ -84,15 +84,20 @@
         .game-wrapper {
             display: flex; /* Flexbox to arrange garden and bank side by side */
             align-items: flex-start; /* Align items at the top */
+            justify-content: center; /* Center horizontally */
+        }
+        .game-header {
+            margin-bottom: 20px; /* Space below the header */
         }
     </style>
 </head>
 <body>
-    <h1>Welcome to the Games</h1>
-    
-    <button id="toggleGarden">Play Garden Game</button>
-    <button id="toggleCoinFlip">Play Coin Flip Game</button>
-    <button id="toggleClicker">Play Clicker Game</button>
+    <div class="game-header">
+        <h1>Welcome to the Games</h1>
+        <button id="toggleGarden">Play Garden Game</button>
+        <button id="toggleCoinFlip">Play Coin Flip Game</button>
+        <button id="toggleClicker">Play Clicker Game</button>
+    </div>
 
     <div class="game-container" id="gardenGame">
         <h2>The Garden Game</h2>
@@ -211,9 +216,7 @@
         function attackGarden(isPoisonEnemy = false) {
             const enemy = document.createElement('div');
             enemy.className = isPoisonEnemy ? 'enemy poisonEnemy' : 'enemy';
-            enemy.innerText = isPoisonEnemy ? '☠️' : '⚔️';
-            enemy.style.left = Math.random() * (document.getElementById('garden').clientWidth - 50) + 'px';
-
+            enemy.innerText = isPoisonEnemy ? '💀' : '👾';
             document.getElementById('garden').appendChild(enemy);
 
             setTimeout(() => {
