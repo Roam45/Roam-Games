@@ -1,347 +1,62 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Roam Games</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #ffffff;
-            text-align: center;
-            padding: 20px;
-        }
-        .game-container {
-            display: none; /* Hide all games initially */
-            margin: 20px auto;
-        }
-        #garden {
-            border: 2px solid green;
-            padding: 10px;
-            width: 300px;
-            height: 200px;
-            background-color: #e0f7fa;
-            position: relative;
-            overflow: hidden;
-        }
-        .plant {
-            position: absolute;
-            bottom: 0;
-            transition: transform 0.5s;
-        }
-        .enemy {
-            position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 24px;
-            transition: top 1s;
-        }
-        .poisonEnemy {
-            color: purple;
-        }
-        .fence {
-            position: absolute;
-            bottom: 40px;
-            height: 20px;
-            width: 30px;
-            background-color: #8B4513;
-            border: 2px solid #654321;
-            border-radius: 5px;
-        }
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-            margin: 5px;
-        }
-        .container {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            display: inline-block;
-        }
-        .result {
-            margin-top: 20px;
-            font-size: 24px;
-        }
-    </style>
-</head>
-<body>
-    <h1>The Garden Game & Coin Flip Game</h1>
-    
-    <!-- Navigation -->
-    <button onclick="showGame('gardenGame')">Garden Game</button>
-    <button onclick="showGame('coinFlipGame')">Coin Flip Game</button>
-
-    <!-- Garden Game -->
-    <div class="game-container" id="gardenGame">
-        <div id="garden"></div>
-        <button id="plantButton">Plant a Seed</button>
-        <button id="buySeedsButton">Buy Seeds ($<span id="seedPrice">1</span>)</button>
-        <button id="sellSeedsButton">Sell Seeds</button>
-        <button id="buyFenceButton">Buy Fence ($<span id="fencePrice">5</span>)</button>
-        <p id="message"></p>
-        <p>Seeds Planted: <span id="seedCount">0</span></p>
-        <p>Money: $<span id="money">10</span></p>
-    </div>
-
-    <!-- Coin Flip Game -->
-    <div class="game-container" id="coinFlipGame">
-        <div class="container">
-            <h1>Coin Flip Game</h1>
-            <h3>Place your bet!</h3>
-            <input type="number" id="betAmount" placeholder="Enter bet amount" min="1" />
-            <div>
-                <button onclick="placeBet('heads')">Bet on Heads</button>
-                <button onclick="placeBet('tails')">Bet on Tails</button>
-            </div>
-            <div class="result" id="result"></div>
-        </div>
-    </div>
-
-    <script>
-        // Garden Game Variables
-        let plantCount = 0;
-        let money = 10; // Start with $10
-        let seedPrice = 1;
-        let fencePrice = 5;
-        const maxFences = 10;
-        const fenceWidth = 30;
-        let fences = [];
-
-        function saveProgress() {
-            const progress = {
-                plantCount,
-                money,
-                seedPrice,
-                fencePrice,
-                fences: fences.map(fence => ({ left: fence.style.left }))
-            };
-            localStorage.setItem('gardenGameProgress', JSON.stringify(progress));
-        }
-
-        function loadProgress() {
-            const savedProgress = localStorage.getItem('gardenGameProgress');
-            if (savedProgress) {
-                const progress = JSON.parse(savedProgress);
-                plantCount = progress.plantCount;
-                money = progress.money;
-                seedPrice = progress.seedPrice;
-                fencePrice = progress.fencePrice;
-
-                document.getElementById('seedCount').innerText = plantCount;
-                document.getElementById('money').innerText = money;
-                document.getElementById('seedPrice').innerText = seedPrice;
-
-                progress.fences.forEach(fenceData => {
-                    const newFence = document.createElement('div');
-                    newFence.className = 'fence';
-                    newFence.style.left = fenceData.left;
-                    document.getElementById('garden').appendChild(newFence);
-                    fences.push(newFence);
-                });
-            }
-        }
-
-        function attackGarden(isPoisonEnemy = false) {
-            const enemy = document.createElement('div');
-            enemy.className = isPoisonEnemy ? 'enemy poisonEnemy' : 'enemy';
-            enemy.innerText = isPoisonEnemy ? '☠️' : '⚔️';
-            enemy.style.left = Math.random() * (document.getElementById('garden').clientWidth - 50) + 'px';
-
-            document.getElementById('garden').appendChild(enemy);
-
-            setTimeout(() => {
-                enemy.style.top = (document.getElementById('garden').clientHeight - 30) + 'px';
-
-                const checkCollision = () => {
-                    let collision = false;
-                    fences.forEach(fence => {
-                        const fenceRect = fence.getBoundingClientRect();
-                        const enemyRect = enemy.getBoundingClientRect();
-                        if (enemyRect.bottom >= fenceRect.top &&
-                            enemyRect.top <= fenceRect.bottom &&
-                            enemyRect.left + enemyRect.width >= fenceRect.left &&
-                            enemyRect.left <= fenceRect.right) {
-                            collision = true;
-                            return;
-                        }
-                    });
-                    return collision;
-                };
-
-                const turnEnemyAround = () => {
-                    enemy.remove();
-                };
-
-                setTimeout(() => {
-                    if (!checkCollision()) {
-                        if (isPoisonEnemy) {
-                            wipeOutCrops();
-                        } else {
-                            stealMoney();
-                        }
-                    }
-                    turnEnemyAround();
-                }, 1000);
-            }, 100);
-        }
-
-        function wipeOutCrops() {
-            const garden = document.getElementById('garden');
-            garden.innerHTML = '';
-            plantCount = 0;
-            document.getElementById('seedCount').innerText = plantCount;
-            document.getElementById('message').innerText = `The poison enemy wiped out all your crops!`;
-            saveProgress();
-        }
-
-        function stealMoney() {
-            const stolenAmount = Math.floor(money * 0.3);
-            money -= stolenAmount;
-            document.getElementById('money').innerText = money;
-            document.getElementById('message').innerText = `The enemy stole $${stolenAmount}!`;
-            saveProgress();
-        }
-
-        setInterval(() => attackGarden(false), 20000);
-        setInterval(() => attackGarden(true), 40000);
-
-        document.getElementById('plantButton').addEventListener('click', function() {
-            plantCount++;
-            const garden = document.getElementById('garden');
-            const newPlant = document.createElement('div');
-            newPlant.className = 'plant';
-            newPlant.style.left = Math.random() * (garden.clientWidth - 50) + 'px';
-            newPlant.style.transform = 'scale(0.5)';
-            newPlant.innerText = '🌱';
-            garden.appendChild(newPlant);
-
-            setTimeout(() => {
-                newPlant.style.transform = 'scale(1)';
-            }, 100);
-
-            document.getElementById('message').innerText = `You have planted ${plantCount} seeds!`;
-            document.getElementById('seedCount').innerText = plantCount;
-            saveProgress();
-        });
-
-        document.getElementById('buySeedsButton').addEventListener('click', function() {
-            if (money >= seedPrice) {
-                money -= seedPrice;
-                document.getElementById('money').innerText = money;
-                seedPrice++;
-                document.getElementById('seedPrice').innerText = seedPrice;
-                document.getElementById('message').innerText = `You bought better seeds!`;
-                saveProgress();
-            } else {
-                document.getElementById('message').innerText = `Not enough money to buy seeds.`;
-            }
-        });
-
-        document.getElementById('sellSeedsButton').addEventListener('click', function() {
-            if (plantCount > 0) {
-                const sellPrice = plantCount === 1 ? 1 : Math.floor(seedPrice / 2);
-                money += sellPrice * plantCount;
-                document.getElementById('money').innerText = money;
-                document.getElementById('message').innerText = `You sold all ${plantCount} seeds for $${sellPrice * plantCount}!`;
-
-                const garden = document.getElementById('garden');
-                const plants = garden.getElementsByClassName('plant');
-                while (plants.length > 0) {
-                    plants[0].remove();
-                }
-                plantCount = 0;
-                document.getElementById('seedCount').innerText = plantCount;
-                saveProgress();
-            } else {
-                document.getElementById('message').innerText = `No seeds to sell.`;
-            }
-        });
-
-        document.getElementById('buyFenceButton').addEventListener('click', function() {
-            if (money >= fencePrice) {
-                if (fences.length < maxFences) {
-                    const garden = document.getElementById('garden');
-                    let newLeft;
-
-                    let overlapping;
-                    do {
-                        overlapping = false;
-                        newLeft = Math.random() * (garden.clientWidth - fenceWidth);
-
-                        for (let fence of fences) {
-                            const fenceRect = fence.getBoundingClientRect();
-                            if (newLeft < fenceRect.left + fenceWidth && newLeft + fenceWidth > fenceRect.left) {
-                                overlapping = true;
-                                break;
-                            }
-                        }
-                    } while (overlapping);
-
-                    money -= fencePrice;
-                    document.getElementById('money').innerText = money;
-
-                    const newFence = document.createElement('div');
-                    newFence.className = 'fence';
-                    newFence.style.left = newLeft + 'px';
-                    garden.appendChild(newFence);
-                    fences.push(newFence);
-
-                    document.getElementById('message').innerText = `You bought a wooden fence!`;
-                    saveProgress();
-
-                    setTimeout(() => {
-                        newFence.remove();
-                        fences = fences.filter(fence => fence !== newFence);
-                        saveProgress();
-                    }, 30000);
-                } else {
-                    document.getElementById('message').innerText = `You can't buy more than ${maxFences} fences.`;
-                }
-            } else {
-                document.getElementById('message').innerText = `Not enough money to buy a fence.`;
-            }
-        });
-
-        // Coin Flip Game Logic
-        let balance = 100; // Starting balance
-
-        function placeBet(choice) {
-            const betAmount = parseInt(document.getElementById('betAmount').value);
-            if (isNaN(betAmount) || betAmount <= 0 || betAmount > balance) {
-                alert("Please enter a valid bet amount.");
-                return;
-            }
-
-            const coinFlip = Math.random() < 0.5 ? 'heads' : 'tails';
-            const resultDiv = document.getElementById('result');
-
-            if (coinFlip === choice) {
-                balance += betAmount;
-                resultDiv.innerHTML = `You won! The coin landed on ${coinFlip}. Your new balance is $${balance}.`;
-            } else {
-                balance -= betAmount;
-                resultDiv.innerHTML = `You lost! The coin landed on ${coinFlip}. Your new balance is $${balance}.`;
-            }
-
-            document.getElementById('betAmount').value = ''; // Clear input
-        }
-
-        // Function to show selected game
-        function showGame(gameId) {
-            document.querySelectorAll('.game-container').forEach(container => {
-                container.style.display = 'none'; // Hide all games
-            });
-            document.getElementById(gameId).style.display = 'block'; // Show selected game
-        }
-
-        // Show the garden game by default on page load
-        window.onload = function() {
-            showGame('gardenGame');
-            loadProgress();
-        };
-    </script>
-</body>
-</html>
+body {
+    font-family: Arial, sans-serif;
+    background-color: #ffffff;
+    text-align: center;
+    padding: 20px;
+}
+.game-container {
+    display: none; /* Hide all games initially */
+    margin: 20px auto; /* Center the game containers */
+    max-width: 320px; /* Limit the width of the game containers */
+}
+#garden {
+    border: 2px solid green;
+    padding: 10px;
+    width: 300px;
+    height: 200px;
+    background-color: #e0f7fa;
+    position: relative;
+    overflow: hidden;
+    margin: 0 auto; /* Center the garden */
+}
+.plant {
+    position: absolute;
+    bottom: 0;
+    transition: transform 0.5s;
+}
+.enemy {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 24px;
+    transition: top 1s;
+}
+.poisonEnemy {
+    color: purple;
+}
+.fence {
+    position: absolute;
+    bottom: 40px;
+    height: 20px;
+    width: 30px;
+    background-color: #8B4513;
+    border: 2px solid #654321;
+    border-radius: 5px;
+}
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    margin: 5px;
+}
+.container {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    display: inline-block;
+}
+.result {
+    margin-top: 20px;
+    font-size: 24px;
+}
