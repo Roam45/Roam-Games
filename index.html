@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Garden and Coin Flip Games</title>
+    <title>Roam Games</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -60,13 +60,6 @@
             font-size: 16px;
             margin: 5px;
         }
-        .container {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            display: inline-block;
-        }
         .result {
             margin-top: 20px;
             font-size: 24px;
@@ -76,6 +69,10 @@
 <body>
     <h1>Welcome to the Games</h1>
     
+    <button id="toggleGarden">Play Garden Game</button>
+    <button id="toggleCoinFlip">Play Coin Flip Game</button>
+    <button id="toggleClicker">Play Clicker Game</button>
+
     <div class="game-container" id="gardenGame">
         <h2>The Garden Game</h2>
         <div id="garden"></div>
@@ -90,6 +87,7 @@
 
     <div class="game-container" id="coinFlipGame">
         <h2>Coin Flip Game</h2>
+        <h3>Your Balance: $<span id="coinBalance">100</span></h3>
         <h3>Place your bet!</h3>
         <input type="number" id="betAmount" placeholder="Enter bet amount" min="1" />
         <div>
@@ -99,8 +97,14 @@
         <div class="result" id="result"></div>
     </div>
 
-    <button id="toggleGarden">Play Garden Game</button>
-    <button id="toggleCoinFlip">Play Coin Flip Game</button>
+    <div class="game-container" id="clickerGame">
+        <h2>Clicker Game</h2>
+        <h3>Points: <span id="clickerPoints">0</span></h3>
+        <button id="clickButton">Click me!</button>
+        <h4>Upgrade: <span id="upgradeCost">5</span> points</h4>
+        <button id="buyUpgradeButton">Buy Upgrade (Points per Click: <span id="pointsPerClick">1</span>)</button>
+        <p id="clickerMessage"></p>
+    </div>
 
     <script>
         // Garden Game Variables
@@ -237,10 +241,10 @@
         document.getElementById('buySeedsButton').addEventListener('click', function() {
             if (money >= seedPrice) {
                 money -= seedPrice;
+                plantCount++;
                 document.getElementById('money').innerText = money;
-                seedPrice++;
-                document.getElementById('seedPrice').innerText = seedPrice;
-                document.getElementById('message').innerText = `You bought better seeds!`;
+                document.getElementById('seedCount').innerText = plantCount;
+                document.getElementById('message').innerText = `You bought a seed!`;
                 saveProgress();
             } else {
                 document.getElementById('message').innerText = `Not enough money to buy seeds.`;
@@ -253,7 +257,7 @@
                 money += sellPrice * plantCount;
                 document.getElementById('money').innerText = money;
                 document.getElementById('message').innerText = `You sold all ${plantCount} seeds for $${sellPrice * plantCount}!`;
-                
+
                 const garden = document.getElementById('garden');
                 const plants = garden.getElementsByClassName('plant');
                 while (plants.length > 0) {
@@ -277,7 +281,7 @@
                     do {
                         overlapping = false;
                         newLeft = Math.random() * (garden.clientWidth - fenceWidth);
-                        
+
                         for (let fence of fences) {
                             const fenceRect = fence.getBoundingClientRect();
                             if (newLeft < fenceRect.left + fenceWidth && newLeft + fenceWidth > fenceRect.left) {
@@ -324,7 +328,7 @@
 
             const coinFlip = Math.random() < 0.5 ? 'heads' : 'tails';
             const resultDiv = document.getElementById('result');
-            
+
             if (coinFlip === choice) {
                 balance += betAmount;
                 resultDiv.innerHTML = `You won! The coin landed on ${coinFlip}. Your new balance is $${balance}.`;
@@ -334,17 +338,48 @@
             }
 
             document.getElementById('betAmount').value = ''; // Clear input
+            document.getElementById('coinBalance').innerText = balance; // Update balance display
         }
+
+        // Clicker Game Logic
+        let clickerPoints = 0;
+        let pointsPerClick = 1;
+
+        document.getElementById('clickButton').addEventListener('click', function() {
+            clickerPoints += pointsPerClick;
+            document.getElementById('clickerPoints').innerText = clickerPoints;
+        });
+
+        document.getElementById('buyUpgradeButton').addEventListener('click', function() {
+            const upgradeCost = 5; // Cost of upgrade
+            if (clickerPoints >= upgradeCost) {
+                clickerPoints -= upgradeCost;
+                pointsPerClick++;
+                document.getElementById('clickerPoints').innerText = clickerPoints;
+                document.getElementById('pointsPerClick').innerText = pointsPerClick;
+                document.getElementById('clickerMessage').innerText = `Upgrade purchased! Points per click: ${pointsPerClick}`;
+            } else {
+                document.getElementById('clickerMessage').innerText = `Not enough points to buy an upgrade.`;
+            }
+        });
 
         // Toggle game visibility
         document.getElementById('toggleGarden').addEventListener('click', function() {
             document.getElementById('gardenGame').style.display = 'block';
             document.getElementById('coinFlipGame').style.display = 'none';
+            document.getElementById('clickerGame').style.display = 'none';
         });
 
         document.getElementById('toggleCoinFlip').addEventListener('click', function() {
             document.getElementById('gardenGame').style.display = 'none';
             document.getElementById('coinFlipGame').style.display = 'block';
+            document.getElementById('clickerGame').style.display = 'none';
+        });
+
+        document.getElementById('toggleClicker').addEventListener('click', function() {
+            document.getElementById('gardenGame').style.display = 'none';
+            document.getElementById('coinFlipGame').style.display = 'none';
+            document.getElementById('clickerGame').style.display = 'block';
         });
 
         // Load progress on page load
