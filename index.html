@@ -42,8 +42,8 @@
 
         #garden {
             border: 2px solid green;
-            width: 100%;
-            height: 200px; /* Fixed height for garden */
+            width: 300px; /* Fixed width for square */
+            height: 300px; /* Fixed height for square */
             background-color: #e0f7fa;
             position: relative;
             overflow: hidden;
@@ -141,7 +141,7 @@
                 const newFence = document.createElement('div');
                 newFence.className = 'fence';
                 newFence.style.position = 'absolute';
-                newFence.style.left = Math.random() * (350 - 30) + 'px';
+                newFence.style.left = Math.random() * (300 - 30) + 'px'; // Adjusted for new width
                 newFence.style.bottom = '40px'; // Adjust fence position
                 newFence.style.height = '20px';
                 newFence.style.width = '30px';
