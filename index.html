@@ -139,7 +139,6 @@
         let seedPrice = 1;
         let fencePrice = 5;
         const maxFences = 10;
-        const fenceWidth = 30;
         let fences = [];
         let bankLevel = 1;
         let storageCapacity = 100;
@@ -181,7 +180,6 @@
 
                 document.getElementById('seedCount').innerText = plantCount;
                 document.getElementById('money').innerText = money;
-                document.getElementById('seedPrice').innerText = seedPrice;
                 document.getElementById('bankLevel').innerText = bankLevel;
                 document.getElementById('storageCapacity').innerText = storageCapacity;
                 document.getElementById('storedMoney').innerText = storedMoney;
@@ -241,26 +239,46 @@
 
         // Plant seeds
         function plantSeed() {
-            plantCount++;
-            document.getElementById('seedCount').innerText = plantCount;
+            if (money >= seedPrice) {
+                money -= seedPrice; // Deduct money for planting seeds
+                plantCount++;
+                document.getElementById('seedCount').innerText = plantCount;
 
-            const plant = document.createElement('img');
-            plant.src = 'https://via.placeholder.com/30?text=🌱'; // Placeholder for plant image
-            plant.className = 'plant';
-            plant.style.left = Math.random() * (document.getElementById('garden').clientWidth - 30) + 'px';
-            document.getElementById('garden').appendChild(plant);
+                const plant = document.createElement('img');
+                plant.src = 'https://via.placeholder.com/30?text=🌱'; // Placeholder for plant image
+                plant.className = 'plant';
+                plant.style.left = Math.random() * (document.getElementById('garden').clientWidth - 30) + 'px';
+                document.getElementById('garden').appendChild(plant);
 
-            saveProgress();
+                saveProgress();
+            } else {
+                document.getElementById('message').innerText = "Not enough money to plant seeds!";
+            }
+        }
+
+        // Sell seeds
+        function sellSeeds() {
+            if (plantCount > 0) {
+                plantCount--;
+                money += seedPrice; // Earn money from selling seeds
+                document.getElementById('seedCount').innerText = plantCount;
+                document.getElementById('money').innerText = money;
+
+                saveProgress();
+            } else {
+                document.getElementById('message').innerText = "No seeds to sell!";
+            }
         }
 
         // Event Listeners
         document.getElementById('plantButton').addEventListener('click', plantSeed);
+        document.getElementById('sellSeedsButton').addEventListener('click', sellSeeds);
         document.getElementById('resetButton').addEventListener('click', () => {
             localStorage.clear();
             location.reload(); // Reload the page to reset the game
         });
         document.getElementById('toggleGarden').addEventListener('click', () => {
-            document.getElementById('gardenGame').style.display = 'block';
+            document.getElementById('gardenGame').style.display = 'flex'; // Show garden game
             document.getElementById('coinFlipGame').style.display = 'none';
             document.getElementById('clickerGame').style.display = 'none';
             loadProgress(); // Load progress when entering the game
