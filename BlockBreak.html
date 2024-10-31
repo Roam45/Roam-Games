@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Box Shooter Game</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: white;
+        }
+        #gameCanvas {
+            border: 1px solid black;
+            display: block;
+            margin: auto;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="1200" height="600"></canvas>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let playerPosX = canvas.width / 2;
+        const playerWidth = 50;
+        const playerHeight = 50;
+        let boxes = [];
+        let score = 0;
+        let bullets = [];
+        let shooting = false; // Flag to indicate if shooting
+
+        const boxWidth = 30;
+        const boxHeight = 30;
+        const boxHealth = 3;
+        let keys = {};
+
+        function spawnBox() {
+            const x = Math.random() * (canvas.width - boxWidth);
+            boxes.push({ x: x, y: 0, health: boxHealth, color: 'red' });
+        }
+
+        function drawPlayer() {
+            ctx.fillStyle = 'green';
+            ctx.fillRect(playerPosX, canvas.height - playerHeight, playerWidth, playerHeight);
+        }
+
+        function drawBoxes() {
+            boxes.forEach(box => {
+                ctx.fillStyle = box.color;
+                ctx.fillRect(box.x, box.y, boxWidth, boxHeight);
+            });
+        }
+
+        function drawBullets() {
+            bullets.forEach(bullet => {
+                ctx.fillStyle = 'blue';
+                ctx.fillRect(bullet.x, bullet.y, 10, 20);
+            });
+        }
+
+        function updateBoxes() {
+            boxes.forEach(box => {
+                box.y += 5; // falling speed
+            });
+            boxes = boxes.filter(box => box.y < canvas.height && box.health > 0); // Remove off-screen boxes and boxes with 0 health
+        }
+
+        function updateBullets() {
+            bullets.forEach(bullet => {
+                bullet.y -= 10; // bullet speed
+            });
+            bullets = bullets.filter(bullet => bullet.y > 0); // Remove off-screen bullets
+        }
+
+        function shoot() {
+            bullets.push({ x: playerPosX + playerWidth / 2 - 5, y: canvas.height - playerHeight }); // Center the bullet
+        }
+
+        function checkCollisions() {
+            bullets.forEach(bullet => {
+                boxes.forEach(box => {
+                    if (bullet.x + 10 > box.x && bullet.x < box.x + boxWidth && bullet.y + 10 > box.y && bullet.y < box.y + boxHeight) {
+                        box.health--;
+                        if (box.health <= 0) {
+                            score++;
+                        }
+                    }
+                });
+            });
+        }
+
+        function gameLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawPlayer();
+            drawBoxes();
+            drawBullets();
+            updateBoxes();
+            updateBullets();
+            checkCollisions();
+
+            ctx.fillStyle = 'black';
+            ctx.fillText(`Score: ${score}`, 10, 20);
+
+            // Movement
+            if (keys['a'] && playerPosX > 0) {
+                playerPosX -= 15; // Move left
+            }
+            if (keys['d'] && playerPosX < canvas.width - playerWidth) {
+                playerPosX += 15; // Move right
+            }
+
+            // Continuous shooting
+            if (shooting) {
+                shoot();
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        window.addEventListener('keydown', (event) => {
+            keys[event.key] = true;
+            if (event.key === ' ') {
+                shooting = true; // Set shooting flag to true
+            }
+        });
+
+        window.addEventListener('keyup', (event) => {
+            keys[event.key] = false;
+            if (event.key === ' ') {
+                shooting = false; // Set shooting flag to false
+            }
+        });
+
+        setInterval(spawnBox, 1000); // Spawn a new box every two seconds
+        gameLoop();
+    </script>
+</body>
+</html
