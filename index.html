@@ -22,13 +22,13 @@
         }
         #garden {
             border: 2px solid green;
+            padding: 10px;
             width: 100%; /* Use full width of container */
             height: 300px; /* Increased height of the garden */
             background-color: #e0f7fa;
             position: relative;
             overflow: hidden;
             margin: 0 auto; /* Center the garden */
-            box-sizing: border-box; /* Include padding in width */
         }
         .plant {
             position: absolute;
@@ -240,10 +240,11 @@
 
         document.getElementById('buySeedsButton').addEventListener('click', function() {
             if (money >= seedPrice) {
-                plantCount++;
                 money -= seedPrice;
+                plantCount++;
                 document.getElementById('money').innerText = money;
                 document.getElementById('seedCount').innerText = plantCount;
+                document.getElementById('message').innerText = `You bought a seed!`;
                 saveProgress();
             } else {
                 document.getElementById('message').innerText = `Not enough money to buy seeds.`;
@@ -252,10 +253,18 @@
 
         document.getElementById('sellSeedsButton').addEventListener('click', function() {
             if (plantCount > 0) {
-                plantCount--;
-                money++;
-                document.getElementById('seedCount').innerText = plantCount;
+                const sellPrice = seedPrice / 2;
+                money += sellPrice * plantCount;
                 document.getElementById('money').innerText = money;
+                document.getElementById('message').innerText = `You sold all ${plantCount} seeds for $${sellPrice * plantCount}!`;
+
+                const garden = document.getElementById('garden');
+                const plants = garden.getElementsByClassName('plant');
+                while (plants.length > 0) {
+                    plants[0].remove();
+                }
+                plantCount = 0;
+                document.getElementById('seedCount').innerText = plantCount;
                 saveProgress();
             } else {
                 document.getElementById('message').innerText = `No seeds to sell.`;
@@ -263,37 +272,89 @@
         });
 
         document.getElementById('buyFenceButton').addEventListener('click', function() {
-            if (money >= fencePrice && fences.length < maxFences) {
-                money -= fencePrice;
-                const newFence = document.createElement('div');
-                newFence.className = 'fence';
-                newFence.style.left = Math.random() * (document.getElementById('garden').clientWidth - fenceWidth) + 'px';
-                document.getElementById('garden').appendChild(newFence);
-                fences.push(newFence);
-                document.getElementById('money').innerText = money;
-                saveProgress();
+            if (money >= fencePrice) {
+                if (fences.length < maxFences) {
+                    const garden = document.getElementById('garden');
+                    let newLeft;
+
+                    let overlapping;
+                    do {
+                        overlapping = false;
+                        newLeft = Math.random() * (garden.clientWidth - fenceWidth);
+
+                        for (let fence of fences) {
+                            const fenceRect = fence.getBoundingClientRect();
+                            if (newLeft < fenceRect.left + fenceWidth && newLeft + fenceWidth > fenceRect.left) {
+                                overlapping = true;
+                                break;
+                            }
+                        }
+                    } while (overlapping);
+
+                    money -= fencePrice;
+                    document.getElementById('money').innerText = money;
+
+                    const newFence = document.createElement('div');
+                    newFence.className = 'fence';
+                    newFence.style.left = newLeft + 'px';
+                    garden.appendChild(newFence);
+                    fences.push(newFence);
+
+                    document.getElementById('message').innerText = `You bought a wooden fence!`;
+                    saveProgress();
+
+                    setTimeout(() => {
+                        newFence.remove();
+                        fences = fences.filter(fence => fence !== newFence);
+                        saveProgress();
+                    }, 30000);
+                } else {
+                    document.getElementById('message').innerText = `You can't buy more than ${maxFences} fences.`;
+                }
             } else {
-                document.getElementById('message').innerText = `Not enough money or fence limit reached.`;
+                document.getElementById('message').innerText = `Not enough money to buy a fence.`;
             }
         });
 
         // Coin Flip Game Logic
+        let coinBalance = 100; // Starting balance for Coin Flip Game
+
         function placeBet(choice) {
             const betAmount = parseInt(document.getElementById('betAmount').value);
-            let balance = parseInt(document.getElementById('coinBalance').innerText);
-            if (betAmount > balance || betAmount <= 0) {
+            if (betAmount > coinBalance || betAmount <= 0) {
                 document.getElementById('result').innerText = 'Invalid bet amount!';
                 return;
             }
-            const outcome = Math.random() < 0.5 ? 'heads' : 'tails';
-            if (choice === outcome) {
-                balance += betAmount;
-                document.getElementById('result').innerText = `You won! The coin landed on ${outcome}.`;
+
+            const coinFlip = Math.random() < 0.5 ? 'heads' : 'tails';
+            const resultDiv = document.getElementById('result');
+
+            if (coinFlip === choice) {
+                coinBalance += betAmount;
+                resultDiv.innerHTML = `You won! The coin landed on ${coinFlip}. Your new balance is $${coinBalance}.`;
             } else {
-                balance -= betAmount;
-                document.getElementById('result').innerText = `You lost! The coin landed on ${outcome}.`;
+                coinBalance -= betAmount;
+                resultDiv.innerHTML = `You lost! The coin landed on ${coinFlip}. Your new balance is $${coinBalance}.`;
             }
-            document.getElementById('coinBalance').innerText = balance;
+
+            document.getElementById('coinBalance').innerText = coinBalance;
+
+            // Check for bankruptcy
+            if (coinBalance <= 0) {
+                alert("You Went Bankrupt!");
+                resetCoinFlipGame();
+            }
+
+            saveAllGames(); // Save progress after betting
+        }
+
+        // Function to reset the Coin Flip Game
+        function resetCoinFlipGame() {
+            coinBalance = 100; // Reset balance to initial amount
+            document.getElementById('coinBalance').innerText = coinBalance;
+            document.getElementById('betAmount').value = ''; // Clear input
+            document.getElementById('result').innerText = ''; // Clear previous results
+            saveAllGames(); // Save progress
         }
 
         // Clicker Game Logic
@@ -303,6 +364,7 @@
         document.getElementById('clickButton').addEventListener('click', function() {
             clickerPoints += pointsPerClick;
             document.getElementById('clickerPoints').innerText = clickerPoints;
+            saveAllGames(); // Save progress after clicking
         });
 
         document.getElementById('buyUpgradeButton').addEventListener('click', function() {
@@ -313,6 +375,7 @@
                 document.getElementById('clickerPoints').innerText = clickerPoints;
                 document.getElementById('pointsPerClick').innerText = pointsPerClick;
                 document.getElementById('clickerMessage').innerText = `Upgrade purchased! Points per click: ${pointsPerClick}`;
+                saveAllGames(); // Save progress after upgrade
             } else {
                 document.getElementById('clickerMessage').innerText = `Not enough points to buy an upgrade.`;
             }
@@ -323,7 +386,6 @@
             document.getElementById('gardenGame').style.display = 'block';
             document.getElementById('coinFlipGame').style.display = 'none';
             document.getElementById('clickerGame').style.display = 'none';
-            loadProgress(); // Load garden progress
         });
 
         document.getElementById('toggleCoinFlip').addEventListener('click', function() {
@@ -338,8 +400,46 @@
             document.getElementById('clickerGame').style.display = 'block';
         });
 
-        // Load progress on page load
-        loadProgress();
+        // Save all games progress to localStorage
+        function saveAllGames() {
+            const coinFlipProgress = {
+                coinBalance,
+            };
+            localStorage.setItem('coinFlipGameProgress', JSON.stringify(coinFlipProgress));
+
+            const clickerProgress = {
+                clickerPoints,
+                pointsPerClick,
+            };
+            localStorage.setItem('clickerGameProgress', JSON.stringify(clickerProgress));
+
+            saveProgress(); // Save garden game progress
+        }
+
+        // Load all games progress from localStorage
+        function loadAllGames() {
+            const savedCoinFlipProgress = localStorage.getItem('coinFlipGameProgress');
+            if (savedCoinFlipProgress) {
+                const progress = JSON.parse(savedCoinFlipProgress);
+                coinBalance = progress.coinBalance;
+                document.getElementById('coinBalance').innerText = coinBalance;
+            }
+
+            const savedClickerProgress = localStorage.getItem('clickerGameProgress');
+            if (savedClickerProgress) {
+                const progress = JSON.parse(savedClickerProgress);
+                clickerPoints = progress.clickerPoints;
+                pointsPerClick = progress.pointsPerClick;
+                document.getElementById('clickerPoints').innerText = clickerPoints;
+                document.getElementById('pointsPerClick').innerText = pointsPerClick;
+            }
+        }
+
+        // Load all progress on page load
+        window.onload = function() {
+            loadProgress();
+            loadAllGames();
+        };
     </script>
 </body>
 </html>
