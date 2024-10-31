@@ -3,29 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Roam Games</title>
+    <title>Garden and Coin Flip Games</title>
     <style>
         body {
-            display: flex;
-            flex-direction: column;
-            justify-content: center; /* Center vertically */
-            align-items: center; /* Center horizontally */
-            height: 100vh; /* Full viewport height */
             font-family: Arial, sans-serif;
             background-color: #ffffff;
+            text-align: center;
             padding: 20px;
         }
-
         .game-container {
-            margin: 20px; /* Space between games */
+            display: none; /* Hide all games initially */
+            margin: 20px auto; /* Center the game containers */
             max-width: 320px; /* Limit the width of the game containers */
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            display: inline-block;
         }
-
         #garden {
             border: 2px solid green;
             padding: 10px;
@@ -36,13 +26,11 @@
             overflow: hidden;
             margin: 0 auto; /* Center the garden */
         }
-
         .plant {
             position: absolute;
             bottom: 0;
             transition: transform 0.5s;
         }
-
         .enemy {
             position: absolute;
             top: 0;
@@ -51,11 +39,9 @@
             font-size: 24px;
             transition: top 1s;
         }
-
         .poisonEnemy {
             color: purple;
         }
-
         .fence {
             position: absolute;
             bottom: 40px;
@@ -65,13 +51,18 @@
             border: 2px solid #654321;
             border-radius: 5px;
         }
-
         button {
             padding: 10px 20px;
             font-size: 16px;
             margin: 5px;
         }
-
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            display: inline-block;
+        }
         .result {
             margin-top: 20px;
             font-size: 24px;
@@ -79,8 +70,9 @@
     </style>
 </head>
 <body>
+    <h1>Welcome to the Games</h1>
     <div class="game-container" id="gardenGame">
-        <h1>The Garden Game</h1>
+        <h2>The Garden Game</h2>
         <div id="garden"></div>
         <button id="plantButton">Plant a Seed</button>
         <button id="buySeedsButton">Buy Seeds ($<span id="seedPrice">1</span>)</button>
@@ -92,7 +84,7 @@
     </div>
 
     <div class="game-container" id="coinFlipGame">
-        <h1>Coin Flip Game</h1>
+        <h2>Coin Flip Game</h2>
         <h3>Place your bet!</h3>
         <input type="number" id="betAmount" placeholder="Enter bet amount" min="1" />
         <div>
@@ -101,6 +93,9 @@
         </div>
         <div class="result" id="result"></div>
     </div>
+
+    <button id="toggleGarden">Play Garden Game</button>
+    <button id="toggleCoinFlip">Play Coin Flip Game</button>
 
     <script>
         // Garden Game Variables
@@ -150,7 +145,7 @@
             }
         }
 
-        // Game logic (attacking garden, wiping crops, stealing money, etc.)
+        // Game logic for the Garden
         function attackGarden(isPoisonEnemy = false) {
             const enemy = document.createElement('div');
             enemy.className = isPoisonEnemy ? 'enemy poisonEnemy' : 'enemy';
@@ -312,8 +307,8 @@
             }
         });
 
-        // Coin Flip Game Variables
-        let balance = 100; // Starting balance
+        // Coin Flip Game Logic
+        let balance = 100; // Starting balance for Coin Flip Game
 
         function placeBet(choice) {
             const betAmount = parseInt(document.getElementById('betAmount').value);
@@ -335,6 +330,17 @@
 
             document.getElementById('betAmount').value = ''; // Clear input
         }
+
+        // Toggle game visibility
+        document.getElementById('toggleGarden').addEventListener('click', function() {
+            document.getElementById('gardenGame').style.display = 'block';
+            document.getElementById('coinFlipGame').style.display = 'none';
+        });
+
+        document.getElementById('toggleCoinFlip').addEventListener('click', function() {
+            document.getElementById('gardenGame').style.display = 'none';
+            document.getElementById('coinFlipGame').style.display = 'block';
+        });
 
         // Load progress on page load
         window.onload = loadProgress;
