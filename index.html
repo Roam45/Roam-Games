@@ -116,22 +116,8 @@
         const fenceWidth = 30;
         let fences = [];
 
-        // Save progress to localStorage
-        function saveProgress() {
-            const progress = {
-                plantCount,
-                money,
-                seedPrice,
-                fencePrice,
-                fences: fences.map(fence => ({
-                    left: fence.style.left
-                }))
-            };
-            localStorage.setItem('gardenGameProgress', JSON.stringify(progress));
-        }
-
-        // Load progress from localStorage
-        function loadProgress() {
+        // Load garden progress from localStorage
+        function loadGardenProgress() {
             const savedProgress = localStorage.getItem('gardenGameProgress');
             if (savedProgress) {
                 const progress = JSON.parse(savedProgress);
@@ -152,6 +138,20 @@
                     fences.push(newFence);
                 });
             }
+        }
+
+        // Save garden progress to localStorage
+        function saveGardenProgress() {
+            const progress = {
+                plantCount,
+                money,
+                seedPrice,
+                fencePrice,
+                fences: fences.map(fence => ({
+                    left: fence.style.left
+                }))
+            };
+            localStorage.setItem('gardenGameProgress', JSON.stringify(progress));
         }
 
         // Game logic for the Garden
@@ -205,7 +205,7 @@
             plantCount = 0;
             document.getElementById('seedCount').innerText = plantCount;
             document.getElementById('message').innerText = `The poison enemy wiped out all your crops!`;
-            saveProgress();
+            saveGardenProgress();
         }
 
         function stealMoney() {
@@ -213,7 +213,7 @@
             money -= stolenAmount;
             document.getElementById('money').innerText = money;
             document.getElementById('message').innerText = `The enemy stole $${stolenAmount}!`;
-            saveProgress();
+            saveGardenProgress();
         }
 
         setInterval(() => attackGarden(false), 20000);
@@ -235,7 +235,7 @@
 
             document.getElementById('message').innerText = `You have planted ${plantCount} seeds!`;
             document.getElementById('seedCount').innerText = plantCount;
-            saveProgress();
+            saveGardenProgress();
         });
 
         document.getElementById('buySeedsButton').addEventListener('click', function() {
@@ -245,7 +245,7 @@
                 document.getElementById('money').innerText = money;
                 document.getElementById('seedCount').innerText = plantCount;
                 document.getElementById('message').innerText = `You bought a seed!`;
-                saveProgress();
+                saveGardenProgress();
             } else {
                 document.getElementById('message').innerText = `Not enough money to buy seeds.`;
             }
@@ -265,7 +265,7 @@
                 }
                 plantCount = 0;
                 document.getElementById('seedCount').innerText = plantCount;
-                saveProgress();
+                saveGardenProgress();
             } else {
                 document.getElementById('message').innerText = `No seeds to sell.`;
             }
@@ -301,12 +301,12 @@
                     fences.push(newFence);
 
                     document.getElementById('message').innerText = `You bought a wooden fence!`;
-                    saveProgress();
+                    saveGardenProgress();
 
                     setTimeout(() => {
                         newFence.remove();
                         fences = fences.filter(fence => fence !== newFence);
-                        saveProgress();
+                        saveGardenProgress();
                     }, 30000);
                 } else {
                     document.getElementById('message').innerText = `You can't buy more than ${maxFences} fences.`;
@@ -318,6 +318,24 @@
 
         // Coin Flip Game Logic
         let coinBalance = 100; // Starting balance for Coin Flip Game
+
+        // Load coin flip progress from localStorage
+        function loadCoinFlipProgress() {
+            const savedCoinFlipProgress = localStorage.getItem('coinFlipGameProgress');
+            if (savedCoinFlipProgress) {
+                const progress = JSON.parse(savedCoinFlipProgress);
+                coinBalance = progress.coinBalance;
+                document.getElementById('coinBalance').innerText = coinBalance;
+            }
+        }
+
+        // Save coin flip progress to localStorage
+        function saveCoinFlipProgress() {
+            const coinFlipProgress = {
+                coinBalance,
+            };
+            localStorage.setItem('coinFlipGameProgress', JSON.stringify(coinFlipProgress));
+        }
 
         function placeBet(choice) {
             const betAmount = parseInt(document.getElementById('betAmount').value);
@@ -345,7 +363,7 @@
                 resetCoinFlipGame();
             }
 
-            saveAllGames(); // Save progress after betting
+            saveCoinFlipProgress(); // Save progress after betting
         }
 
         // Function to reset the Coin Flip Game
@@ -354,17 +372,38 @@
             document.getElementById('coinBalance').innerText = coinBalance;
             document.getElementById('betAmount').value = ''; // Clear input
             document.getElementById('result').innerText = ''; // Clear previous results
-            saveAllGames(); // Save progress
+            saveCoinFlipProgress(); // Save progress
         }
 
         // Clicker Game Logic
         let clickerPoints = 0;
         let pointsPerClick = 1;
 
+        // Load clicker progress from localStorage
+        function loadClickerProgress() {
+            const savedClickerProgress = localStorage.getItem('clickerGameProgress');
+            if (savedClickerProgress) {
+                const progress = JSON.parse(savedClickerProgress);
+                clickerPoints = progress.clickerPoints;
+                pointsPerClick = progress.pointsPerClick;
+                document.getElementById('clickerPoints').innerText = clickerPoints;
+                document.getElementById('pointsPerClick').innerText = pointsPerClick;
+            }
+        }
+
+        // Save clicker progress to localStorage
+        function saveClickerProgress() {
+            const clickerProgress = {
+                clickerPoints,
+                pointsPerClick,
+            };
+            localStorage.setItem('clickerGameProgress', JSON.stringify(clickerProgress));
+        }
+
         document.getElementById('clickButton').addEventListener('click', function() {
             clickerPoints += pointsPerClick;
             document.getElementById('clickerPoints').innerText = clickerPoints;
-            saveAllGames(); // Save progress after clicking
+            saveClickerProgress(); // Save progress after clicking
         });
 
         document.getElementById('buyUpgradeButton').addEventListener('click', function() {
@@ -375,7 +414,7 @@
                 document.getElementById('clickerPoints').innerText = clickerPoints;
                 document.getElementById('pointsPerClick').innerText = pointsPerClick;
                 document.getElementById('clickerMessage').innerText = `Upgrade purchased! Points per click: ${pointsPerClick}`;
-                saveAllGames(); // Save progress after upgrade
+                saveClickerProgress(); // Save progress after upgrade
             } else {
                 document.getElementById('clickerMessage').innerText = `Not enough points to buy an upgrade.`;
             }
@@ -400,45 +439,11 @@
             document.getElementById('clickerGame').style.display = 'block';
         });
 
-        // Save all games progress to localStorage
-        function saveAllGames() {
-            const coinFlipProgress = {
-                coinBalance,
-            };
-            localStorage.setItem('coinFlipGameProgress', JSON.stringify(coinFlipProgress));
-
-            const clickerProgress = {
-                clickerPoints,
-                pointsPerClick,
-            };
-            localStorage.setItem('clickerGameProgress', JSON.stringify(clickerProgress));
-
-            saveProgress(); // Save garden game progress
-        }
-
-        // Load all games progress from localStorage
-        function loadAllGames() {
-            const savedCoinFlipProgress = localStorage.getItem('coinFlipGameProgress');
-            if (savedCoinFlipProgress) {
-                const progress = JSON.parse(savedCoinFlipProgress);
-                coinBalance = progress.coinBalance;
-                document.getElementById('coinBalance').innerText = coinBalance;
-            }
-
-            const savedClickerProgress = localStorage.getItem('clickerGameProgress');
-            if (savedClickerProgress) {
-                const progress = JSON.parse(savedClickerProgress);
-                clickerPoints = progress.clickerPoints;
-                pointsPerClick = progress.pointsPerClick;
-                document.getElementById('clickerPoints').innerText = clickerPoints;
-                document.getElementById('pointsPerClick').innerText = pointsPerClick;
-            }
-        }
-
         // Load all progress on page load
         window.onload = function() {
-            loadProgress();
-            loadAllGames();
+            loadGardenProgress();
+            loadCoinFlipProgress();
+            loadClickerProgress();
         };
     </script>
 </body>
