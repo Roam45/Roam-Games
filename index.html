@@ -10,6 +10,16 @@
             background-color: #ffffff;
             text-align: center;
             padding: 20px;
+            position: relative;
+        }
+        .emoji-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            opacity: 0.1;
+            z-index: -1;
         }
         .game-container {
             display: none; /* Hide all games initially */
@@ -19,13 +29,16 @@
             border-radius: 10px; /* Rounded corners for better aesthetics */
             padding: 20px; /* Added padding */
             background-color: #f9f9f9; /* Light background for the containers */
+        }
+        #garden, #coinFlip, #clicker {
             display: flex; /* Flexbox layout */
-            justify-content: space-between; /* Space between garden and bank */
+            justify-content: space-between; /* Space between game and bank */
+            margin-bottom: 20px;
         }
         #garden {
             border: 2px solid green;
             width: 65%; /* Garden takes up 65% of the width */
-            height: 300px; /* Increased height of the garden */
+            height: 300px; /* Height of the garden */
             background-color: #e0f7fa;
             position: relative;
             overflow: hidden;
@@ -33,31 +46,6 @@
             justify-content: center; /* Center horizontally */
             align-items: flex-end; /* Align plants at the bottom */
             padding: 10px; /* Add padding */
-        }
-        .plant {
-            position: absolute;
-            bottom: 0;
-            transition: transform 0.5s;
-        }
-        .enemy {
-            position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 24px;
-            transition: top 1s;
-        }
-        .poisonEnemy {
-            color: purple;
-        }
-        .fence {
-            position: absolute;
-            bottom: 40px;
-            height: 20px;
-            width: 30px;
-            background-color: #8B4513;
-            border: 2px solid #654321;
-            border-radius: 5px;
         }
         .bank-container {
             width: 30%; /* Bank takes up 30% of the width */
@@ -86,19 +74,17 @@
 
     <div class="game-container" id="gardenGame">
         <h2>The Garden Game</h2>
-        <div class="game-wrapper" style="display: flex;">
-            <div id="garden"></div>
-            <div class="bank-container">
-                <h3>Bank</h3>
-                <p>Level: <span id="bankLevel">1</span></p>
-                <p>Storage Capacity: $<span id="storageCapacity">100</span></p>
-                <p>Stored Money: $<span id="storedMoney">0</span></p>
-                <p>Insurance: <span id="insuranceStatus">Not Purchased</span></p>
-                <button id="depositButton">Deposit Money</button>
-                <button id="levelUpButton">Level Up Bank ($<span id="levelUpCost">50</span>)</button>
-                <button id="buyInsuranceButton">Buy Insurance ($<span id="insuranceCost">10</span>)</button>
-                <p id="bankMessage"></p>
-            </div>
+        <div id="garden"></div>
+        <div class="bank-container">
+            <h3>Bank</h3>
+            <p>Level: <span id="bankLevel">1</span></p>
+            <p>Storage Capacity: $<span id="storageCapacity">100</span></p>
+            <p>Stored Money: $<span id="storedMoney">0</span></p>
+            <p>Insurance: <span id="insuranceStatus">Not Purchased</span></p>
+            <button id="depositButton">Deposit Money</button>
+            <button id="levelUpButton">Level Up Bank ($<span id="levelUpCost">50</span>)</button>
+            <button id="buyInsuranceButton">Buy Insurance ($<span id="insuranceCost">10</span>)</button>
+            <p id="bankMessage"></p>
         </div>
         <button id="plantButton">Plant a Seed</button>
         <button id="buySeedsButton">Buy Seeds ($<span id="seedPrice">1</span>)</button>
@@ -118,7 +104,8 @@
             <button onclick="placeBet('heads')">Bet on Heads</button>
             <button onclick="placeBet('tails')">Bet on Tails</button>
         </div>
-        <div class="result" id="result"></div>
+        <p class="result" id="result"></p>
+        <button id="resetButton">Reset All Game Data</button>
     </div>
 
     <div class="game-container" id="clickerGame">
@@ -128,9 +115,12 @@
         <h4>Upgrade: <span id="upgradeCost">5</span> points</h4>
         <button id="buyUpgradeButton">Buy Upgrade (Points per Click: <span id="pointsPerClick">1</span>)</button>
         <p id="clickerMessage"></p>
+        <button id="resetButton">Reset All Game Data</button>
     </div>
 
-    <button id="resetButton">Reset All Game Data</button>
+    <div class="emoji-background">
+        <div style="font-size: 50px;">🌱⚔️🌱⚔️🌱⚔️🌱⚔️🌱⚔️</div>
+    </div>
 
     <script>
         // Garden Game Variables
