@@ -12,7 +12,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center; /* Center the content vertically */
+            justify-content: center;
             background-color: #ffffff;
         }
 
@@ -21,23 +21,29 @@
         }
 
         .game-container {
-            width: 400px; /* Adjusted width for the container */
-            height: auto; /* Auto height to fit content */
-            display: none; /* Start hidden */
+            width: 300px;
+            height: auto;
+            display: flex;
             justify-content: center;
             align-items: center;
             flex-direction: column;
             padding: 20px;
             box-sizing: border-box;
-            border: 1px solid #ccc; /* Border for distinction */
-            border-radius: 10px; /* Rounded corners */
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .game-container.active {
+            opacity: 1;
         }
 
         #garden {
             border: 2px solid green;
-            width: 300px; /* Fixed width for the playing board */
-            height: 300px; /* Fixed height for the playing board */
+            width: 300px;
+            height: 300px;
             background-color: #e0f7fa;
             position: relative;
             overflow: hidden;
@@ -46,18 +52,26 @@
             align-items: flex-end;
             padding: 10px;
             margin-bottom: 20px;
+            font-size: 30px; /* Size for the emoji */
         }
 
         button {
             padding: 10px 20px;
             font-size: 16px;
             margin: 5px;
-            cursor: pointer; /* Change cursor to pointer */
+            cursor: pointer;
         }
 
         .result {
             margin-top: 20px;
             font-size: 24px;
+        }
+
+        .thief {
+            position: absolute;
+            bottom: 40px; /* Position above the ground */
+            left: 50%; /* Centered horizontally */
+            transform: translateX(-50%); /* Centering adjustment */
         }
     </style>
 </head>
@@ -74,12 +88,10 @@
         <button id="plantButton">Plant a Seed</button>
         <button id="buySeedsButton">Buy Seeds ($<span id="seedPrice">1</span>)</button>
         <button id="sellSeedsButton">Sell Seeds</button>
-        <button id="buyInsuranceButton">Buy Insurance ($<span id="insurancePrice">10</span>)</button>
-        <button id="thiefButton">Call the Thief</button>
+        <button id="buyFenceButton">Buy Fence ($<span id="fencePrice">5</span>)</button>
         <p id="message"></p>
         <p>Seeds Planted: <span id="seedCount">0</span></p>
         <p>Money: $<span id="money">10</span></p>
-        <p>Insurance Status: <span id="insuranceStatus">Not Purchased</span></p>
     </div>
 
     <div class="game-container" id="coinFlipGame">
@@ -107,8 +119,10 @@
         let plantCount = 0;
         let money = 10;
         let seedPrice = 1;
-        let insurancePrice = 10;
-        let insurancePurchased = false;
+        let fencePrice = 5;
+        const maxFences = 10;
+        let fences = [];
+        let thief;
 
         // Coin Flip Game Variables
         let coinBalance = 100;
@@ -130,30 +144,40 @@
             }
         });
 
-        document.getElementById('buyInsuranceButton').addEventListener('click', function() {
-            if (money >= insurancePrice) {
-                money -= insurancePrice;
-                insurancePurchased = true;
+        document.getElementById('buyFenceButton').addEventListener('click', function() {
+            if (money >= fencePrice && fences.length < maxFences) {
+                money -= fencePrice;
+                const newFence = document.createElement('div');
+                newFence.className = 'fence';
+                newFence.style.position = 'absolute';
+                newFence.style.left = Math.random() * (300 - 30) + 'px';
+                newFence.style.bottom = '40px';
+                newFence.style.height = '20px';
+                newFence.style.width = '30px';
+                newFence.style.backgroundColor = '#8B4513';
+                document.getElementById('garden').appendChild(newFence);
+                fences.push(newFence);
                 document.getElementById('money').innerText = money;
-                document.getElementById('insuranceStatus').innerText = "Purchased";
-                document.getElementById('message').innerText = "Insurance purchased!";
             } else {
-                document.getElementById('message').innerText = "Not enough money for insurance!";
+                document.getElementById('message').innerText = "Not enough money or max fences reached!";
             }
         });
 
-        document.getElementById('thiefButton').addEventListener('click', function() {
-            if (insurancePurchased) {
-                const stolenAmount = money; // Amount stolen
-                money = Math.floor(stolenAmount * 0.8); // Return 80% of the stolen amount
-                document.getElementById('money').innerText = money;
-                document.getElementById('message').innerText = `The thief stole your money, but you got back $${Math.floor(stolenAmount * 0.8)} from your insurance!`;
-            } else {
-                money = 0; // The thief steals all the money
-                document.getElementById('money').innerText = money;
-                document.getElementById('message').innerText = "The thief stole all your money!";
+        // Thief Logic
+        function spawnThief() {
+            if (thief) {
+                thief.remove(); // Remove the existing thief if present
             }
-        });
+            thief = document.createElement('div');
+            thief.className = 'thief';
+            thief.innerText = '⚔️'; // Use the sword emoji as the thief
+            document.getElementById('garden').appendChild(thief);
+            setTimeout(() => {
+                thief.remove(); // Remove thief after some time (e.g., 5 seconds)
+            }, 5000);
+        }
+
+        setInterval(spawnThief, 20000); // Spawn a thief every 20 seconds
 
         // Coin Flip Game Logic
         document.getElementById('betHeadsButton').addEventListener('click', function() {
@@ -199,21 +223,21 @@
 
         // Toggle Games
         document.getElementById('toggleGarden').addEventListener('click', function() {
-            document.getElementById('gardenGame').style.display = 'flex';
-            document.getElementById('coinFlipGame').style.display = 'none';
-            document.getElementById('clickerGame').style.display = 'none';
+            document.getElementById('gardenGame').classList.add('active');
+            document.getElementById('coinFlipGame').classList.remove('active');
+            document.getElementById('clickerGame').classList.remove('active');
         });
 
         document.getElementById('toggleCoinFlip').addEventListener('click', function() {
-            document.getElementById('gardenGame').style.display = 'none';
-            document.getElementById('coinFlipGame').style.display = 'flex';
-            document.getElementById('clickerGame').style.display = 'none';
+            document.getElementById('gardenGame').classList.remove('active');
+            document.getElementById('coinFlipGame').classList.add('active');
+            document.getElementById('clickerGame').classList.remove('active');
         });
 
         document.getElementById('toggleClicker').addEventListener('click', function() {
-            document.getElementById('gardenGame').style.display = 'none';
-            document.getElementById('coinFlipGame').style.display = 'none';
-            document.getElementById('clickerGame').style.display = 'flex';
+            document.getElementById('gardenGame').classList.remove('active');
+            document.getElementById('coinFlipGame').classList.remove('active');
+            document.getElementById('clickerGame').classList.add('active');
         });
     </script>
 </body>
