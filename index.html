@@ -3,242 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Roam Games</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background-color: #ffffff;
-        }
-
-        h1 {
-            margin: 20px;
-        }
-
-        .game-container {
-            width: 300px;
-            height: auto;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            padding: 20px;
-            box-sizing: border-box;
-            border: 1px solid #ccc;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-
-        .game-container.active {
-            opacity: 1;
-        }
-
-        #garden {
-            border: 2px solid green;
-            width: 300px;
-            height: 300px;
-            background-color: #e0f7fa;
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: flex-end;
-            padding: 10px;
-            margin-bottom: 20px;
-            font-size: 30px; /* Size for the emoji */
-        }
-
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-            margin: 5px;
-            cursor: pointer;
-        }
-
-        .result {
-            margin-top: 20px;
-            font-size: 24px;
-        }
-
-        .thief {
-            position: absolute;
-            bottom: 40px; /* Position above the ground */
-            left: 50%; /* Centered horizontally */
-            transform: translateX(-50%); /* Centering adjustment */
-        }
-    </style>
+    <title>Chat System</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Welcome to the Games</h1>
-    
-    <button id="toggleGarden">Play Garden Game</button>
-    <button id="toggleCoinFlip">Play Coin Flip Game</button>
-    <button id="toggleClicker">Play Clicker Game</button>
-
-    <div class="game-container" id="gardenGame">
-        <h2>The Garden Game</h2>
-        <div id="garden"></div>
-        <button id="plantButton">Plant a Seed</button>
-        <button id="buySeedsButton">Buy Seeds ($<span id="seedPrice">1</span>)</button>
-        <button id="sellSeedsButton">Sell Seeds</button>
-        <button id="buyFenceButton">Buy Fence ($<span id="fencePrice">5</span>)</button>
-        <p id="message"></p>
-        <p>Seeds Planted: <span id="seedCount">0</span></p>
-        <p>Money: $<span id="money">10</span></p>
+    <div id="chat-window">
+        <div id="messages"></div>
+        <input type="text" id="message-input" placeholder="Type a message...">
+        <button id="send-button">Send</button>
     </div>
-
-    <div class="game-container" id="coinFlipGame">
-        <h2>Coin Flip Game</h2>
-        <h3>Your Balance: $<span id="coinBalance">100</span></h3>
-        <input type="number" id="betAmount" placeholder="Enter bet amount" min="1" />
-        <div>
-            <button id="betHeadsButton">Bet on Heads</button>
-            <button id="betTailsButton">Bet on Tails</button>
-        </div>
-        <div class="result" id="result"></div>
-    </div>
-
-    <div class="game-container" id="clickerGame">
-        <h2>Clicker Game</h2>
-        <h3>Points: <span id="clickerPoints">0</span></h3>
-        <button id="clickButton">Click me!</button>
-        <h4>Upgrade: <span id="upgradeCost">5</span> points</h4>
-        <button id="buyUpgradeButton">Buy Upgrade (Points per Click: <span id="pointsPerClick">1</span>)</button>
-        <p id="clickerMessage"></p>
-    </div>
-
     <script>
-        // Garden Game Variables
-        let plantCount = 0;
-        let money = 10;
-        let seedPrice = 1;
-        let fencePrice = 5;
-        const maxFences = 10;
-        let fences = [];
-        let thief;
+        const messagesDiv = document.getElementById('messages');
+        const messageInput = document.getElementById('message-input');
+        const sendButton = document.getElementById('send-button');
 
-        // Coin Flip Game Variables
-        let coinBalance = 100;
+        // Establish WebSocket connection
+        const socket = new WebSocket('ws://localhost:3000');
 
-        // Clicker Game Variables
-        let clickerPoints = 0;
-        let pointsPerClick = 1;
+        socket.addEventListener('open', () => {
+            console.log('Connected to the server');
+            // Send a message from the client when connected
+            const welcomeMessage = 'Hello from the client!';
+            socket.send(welcomeMessage);
+            sendMessage(welcomeMessage);
+        });
 
-        // Garden Game Functions
-        document.getElementById('plantButton').addEventListener('click', function() {
-            if (money >= seedPrice) {
-                plantCount++;
-                money -= seedPrice;
-                document.getElementById('seedCount').innerText = plantCount;
-                document.getElementById('money').innerText = money;
-                document.getElementById('message').innerText = "Seed planted!";
-            } else {
-                document.getElementById('message').innerText = "Not enough money!";
+        socket.addEventListener('message', (event) => {
+            sendMessage(event.data, true); // Server messages
+        });
+
+        sendButton.addEventListener('click', () => {
+            const message = messageInput.value;
+            if (message) {
+                socket.send(message); // Send message to server
+                sendMessage(message);  // Show message in chat
+                messageInput.value = ''; // Clear input
             }
         });
 
-        document.getElementById('buyFenceButton').addEventListener('click', function() {
-            if (money >= fencePrice && fences.length < maxFences) {
-                money -= fencePrice;
-                const newFence = document.createElement('div');
-                newFence.className = 'fence';
-                newFence.style.position = 'absolute';
-                newFence.style.left = Math.random() * (300 - 30) + 'px';
-                newFence.style.bottom = '40px';
-                newFence.style.height = '20px';
-                newFence.style.width = '30px';
-                newFence.style.backgroundColor = '#8B4513';
-                document.getElementById('garden').appendChild(newFence);
-                fences.push(newFence);
-                document.getElementById('money').innerText = money;
-            } else {
-                document.getElementById('message').innerText = "Not enough money or max fences reached!";
-            }
-        });
-
-        // Thief Logic
-        function spawnThief() {
-            if (thief) {
-                thief.remove(); // Remove the existing thief if present
-            }
-            thief = document.createElement('div');
-            thief.className = 'thief';
-            thief.innerText = '⚔️'; // Use the sword emoji as the thief
-            document.getElementById('garden').appendChild(thief);
-            setTimeout(() => {
-                thief.remove(); // Remove thief after some time (e.g., 5 seconds)
-            }, 5000);
+        function sendMessage(message, fromServer = false) {
+            const msgElement = document.createElement('div');
+            msgElement.textContent = message;
+            msgElement.className = 'message ' + (fromServer ? 'server' : 'client');
+            messagesDiv.appendChild(msgElement);
+            
+            // Scroll to the bottom of the messages div
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
         }
-
-        setInterval(spawnThief, 20000); // Spawn a thief every 20 seconds
-
-        // Coin Flip Game Logic
-        document.getElementById('betHeadsButton').addEventListener('click', function() {
-            placeBet('heads');
-        });
-
-        document.getElementById('betTailsButton').addEventListener('click', function() {
-            placeBet('tails');
-        });
-
-        function placeBet(choice) {
-            const betAmount = parseInt(document.getElementById('betAmount').value);
-            if (betAmount > coinBalance) {
-                document.getElementById('result').innerText = "Insufficient balance!";
-                return;
-            }
-            const flipResult = Math.random() < 0.5 ? 'heads' : 'tails';
-            if (flipResult === choice) {
-                coinBalance += betAmount;
-                document.getElementById('result').innerText = `You win! Result: ${flipResult}`;
-            } else {
-                coinBalance -= betAmount;
-                document.getElementById('result').innerText = `You lose! Result: ${flipResult}`;
-            }
-            document.getElementById('coinBalance').innerText = coinBalance;
-            document.getElementById('betAmount').value = '';
-        }
-
-        // Clicker Game Logic
-        document.getElementById('clickButton').addEventListener('click', function() {
-            clickerPoints += pointsPerClick;
-            document.getElementById('clickerPoints').innerText = clickerPoints;
-        });
-
-        document.getElementById('buyUpgradeButton').addEventListener('click', function() {
-            if (clickerPoints >= 5) {
-                clickerPoints -= 5;
-                pointsPerClick++;
-                document.getElementById('clickerPoints').innerText = clickerPoints;
-                document.getElementById('pointsPerClick').innerText = pointsPerClick;
-            }
-        });
-
-        // Toggle Games
-        document.getElementById('toggleGarden').addEventListener('click', function() {
-            document.getElementById('gardenGame').classList.add('active');
-            document.getElementById('coinFlipGame').classList.remove('active');
-            document.getElementById('clickerGame').classList.remove('active');
-        });
-
-        document.getElementById('toggleCoinFlip').addEventListener('click', function() {
-            document.getElementById('gardenGame').classList.remove('active');
-            document.getElementById('coinFlipGame').classList.add('active');
-            document.getElementById('clickerGame').classList.remove('active');
-        });
-
-        document.getElementById('toggleClicker').addEventListener('click', function() {
-            document.getElementById('gardenGame').classList.remove('active');
-            document.getElementById('coinFlipGame').classList.remove('active');
-            document.getElementById('clickerGame').classList.add('active');
-        });
     </script>
 </body>
 </html>
