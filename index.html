@@ -1,55 +1,443 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat System</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chime - Play Your Favorite Games</title>
+  <style>
+    /* General Styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #4a90e2, #357ab7); /* Linear gradient background */
+      color: white;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    header {
+      background-color: #333;
+      color: white;
+      padding: 15px;
+      text-align: center;
+    }
+
+    header nav ul {
+      list-style-type: none;
+    }
+
+    header nav ul li {
+      display: inline;
+      margin: 0 15px;
+    }
+
+    header nav ul li a {
+      color: white;
+      text-decoration: none;
+    }
+
+    main {
+      flex-grow: 1;
+      padding: 20px;
+      text-align: center;
+    }
+
+    footer {
+      text-align: center;
+      padding: 10px;
+      background-color: #333;
+      color: white;
+    }
+
+    .game-list {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .game {
+      text-align: center;
+      margin: 0 15px;
+      cursor: pointer;
+    }
+
+    .game img {
+      width: 100px;
+      height: 100px;
+      border-radius: 8px;
+    }
+
+    #game-container {
+      margin-top: 50px;
+    }
+
+    button {
+      background-color: #4a90e2;
+      color: white;
+      border: none;
+      padding: 10px;
+      margin: 5px;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    button:hover {
+      background-color: #357ab7;
+    }
+
+    .game-status {
+      margin-top: 20px;
+    }
+
+    /* Tic Tac Toe Styles */
+    .ttt-board {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      grid-gap: 5px;
+      justify-content: center;
+      margin: 20px auto;
+    }
+    .ttt-cell {
+      width: 100px;
+      height: 100px;
+      background-color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      cursor: pointer;
+      border: 2px solid #4a90e2;
+      color: #333;
+    }
+
+    /* Snake Styles */
+    #snake-game {
+      width: 300px;
+      height: 300px;
+      background-color: #fff;
+      margin: 20px auto;
+      border: 2px solid #4a90e2;
+    }
+    .snake { background-color: #4a90e2; }
+    .food { background-color: red; }
+
+    /* Memory Game Styles */
+    .memory-game {
+      display: grid;
+      grid-template-columns: repeat(4, 80px);
+      grid-gap: 10px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    .memory-card {
+      width: 80px;
+      height: 80px;
+      background-color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      border: 2px solid #4a90e2;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
-    <div id="chat-window">
-        <div id="messages"></div>
-        <input type="text" id="message-input" placeholder="Type a message...">
-        <button id="send-button">Send</button>
+
+  <header>
+    <h1>Welcome to Chime</h1>
+    <nav>
+      <ul>
+        <li><a href="#home" onclick="showHomePage()">Home</a></li>
+        <li><a href="#game1" onclick="startGame('ticTacToe')">Tic-Tac-Toe</a></li>
+        <li><a href="#game2" onclick="startGame('snake')">Snake</a></li>
+        <li><a href="#game3" onclick="startGame('memory')">Memory Game</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main id="main-content">
+    <!-- Homepage Content -->
+    <div id="home" class="home-content">
+      <h2>Featured Games</h2>
+      <div class="game-list">
+        <div class="game" onclick="startGame('ticTacToe')">
+          <img src="https://via.placeholder.com/100" alt="Tic Tac Toe">
+          <h3>Tic-Tac-Toe</h3>
+        </div>
+        <div class="game" onclick="startGame('snake')">
+          <img src="https://via.placeholder.com/100" alt="Snake">
+          <h3>Snake</h3>
+        </div>
+        <div class="game" onclick="startGame('memory')">
+          <img src="https://via.placeholder.com/100" alt="Memory Game">
+          <h3>Memory Game</h3>
+        </div>
+      </div>
     </div>
-    <script>
-        const messagesDiv = document.getElementById('messages');
-        const messageInput = document.getElementById('message-input');
-        const sendButton = document.getElementById('send-button');
 
-        // Establish WebSocket connection
-        const socket = new WebSocket('ws://localhost:3000');
+    <!-- Tic-Tac-Toe Game -->
+    <div id="ticTacToe" class="game-content" style="display: none;">
+      <h2>Tic-Tac-Toe</h2>
+      <div class="ttt-board" id="ttt-board"></div>
+      <button onclick="resetTicTacToe()">Reset</button>
+      <p id="ttt-status" class="game-status">Player X's turn</p>
+    </div>
 
-        socket.addEventListener('open', () => {
-            console.log('Connected to the server');
-            // Send a message from the client when connected
-            const welcomeMessage = 'Hello from the client!';
-            socket.send(welcomeMessage);
-            sendMessage(welcomeMessage);
-        });
+    <!-- Snake Game -->
+    <div id="snake" class="game-content" style="display: none;">
+      <h2>Snake</h2>
+      <div id="snake-game"></div>
+      <button onclick="resetSnake()">Reset</button>
+      <p id="snake-status" class="game-status">Score: 0</p>
+    </div>
 
-        socket.addEventListener('message', (event) => {
-            sendMessage(event.data, true); // Server messages
-        });
+    <!-- Memory Game -->
+    <div id="memory" class="game-content" style="display: none;">
+      <h2>Memory Game</h2>
+      <div class="memory-game" id="memory-game"></div>
+      <button onclick="resetMemory()">Reset</button>
+      <p id="memory-status" class="game-status">Flipped: 0</p>
+    </div>
+  </main>
 
-        sendButton.addEventListener('click', () => {
-            const message = messageInput.value;
-            if (message) {
-                socket.send(message); // Send message to server
-                sendMessage(message);  // Show message in chat
-                messageInput.value = ''; // Clear input
-            }
-        });
+  <footer>
+    <p>&copy; 2024 Chime Games</p>
+  </footer>
 
-        function sendMessage(message, fromServer = false) {
-            const msgElement = document.createElement('div');
-            msgElement.textContent = message;
-            msgElement.className = 'message ' + (fromServer ? 'server' : 'client');
-            messagesDiv.appendChild(msgElement);
-            
-            // Scroll to the bottom of the messages div
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  <script>
+    // General function to switch between home and game page
+    function showHomePage() {
+      document.getElementById('home').style.display = 'block';
+      document.getElementById('ticTacToe').style.display = 'none';
+      document.getElementById('snake').style.display = 'none';
+      document.getElementById('memory').style.display = 'none';
+    }
+
+    // Function to start the selected game
+    function startGame(game) {
+      showHomePage(); // Hide all games first
+      document.getElementById(game).style.display = 'block';
+      if (game === 'ticTacToe') {
+        startTicTacToe();
+      } else if (game === 'snake') {
+        startSnake();
+      } else if (game === 'memory') {
+        startMemoryGame();
+      }
+    }
+
+    /* ================================================
+                   TIC-TAC-TOE GAME
+    ================================================== */
+
+    let currentPlayer = 'X';
+    let board = ['', '', '', '', '', '', '', '', ''];
+    const boardElement = document.getElementById('ttt-board');
+    const statusElement = document.getElementById('ttt-status');
+
+    function startTicTacToe() {
+      // Render the board
+      boardElement.innerHTML = '';
+      board.forEach((cell, index) => {
+        const cellElement = document.createElement('div');
+        cellElement.classList.add('ttt-cell');
+        cellElement.innerText = cell;
+        cellElement.onclick = () => handleTicTacToeClick(index);
+        boardElement.appendChild(cellElement);
+      });
+      statusElement.innerText = `Player ${currentPlayer}'s turn`;
+    }
+
+    function handleTicTacToeClick(index) {
+      if (board[index] === '') {
+        board[index] = currentPlayer;
+        currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+        startTicTacToe();
+        checkWinner();
+      }
+    }
+
+    function checkWinner() {
+      const winningCombinations = [
+        [0, 1, 2], [3, 4, 5], [6, 7, 8],
+        [0, 3, 6], [1, 4, 7], [2, 5, 8],
+        [0, 4, 8], [2, 4, 6]
+      ];
+      for (let combo of winningCombinations) {
+        const [a, b, c] = combo;
+        if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+          statusElement.innerText = `${board[a]} wins!`;
+          return;
         }
-    </script>
+      }
+      if (!board.includes('')) {
+        statusElement.innerText = 'It\'s a draw!';
+      }
+    }
+
+    function resetTicTacToe() {
+      board = ['', '', '', '', '', '', '', '', ''];
+      currentPlayer = 'X';
+      startTicTacToe();
+    }
+
+    /* ================================================
+                   SNAKE GAME
+    ================================================== */
+
+    let snake, food, direction, score;
+    const snakeGame = document.getElementById('snake-game');
+    const snakeStatus = document.getElementById('snake-status');
+
+    function startSnake() {
+      snake = [{ x: 10, y: 10 }];
+      direction = 'RIGHT';
+      score = 0;
+      spawnFood();
+      document.addEventListener('keydown', handleSnakeDirection);
+      gameLoop();
+    }
+
+    function gameLoop() {
+      const gameInterval = setInterval(() => {
+        moveSnake();
+        checkCollisions();
+        renderSnake();
+        renderFood();
+      }, 100);
+    }
+
+    function moveSnake() {
+      const head = { ...snake[0] };
+      if (direction === 'UP') head.y--;
+      if (direction === 'DOWN') head.y++;
+      if (direction === 'LEFT') head.x--;
+      if (direction === 'RIGHT') head.x++;
+      snake.unshift(head);
+      if (head.x === food.x && head.y === food.y) {
+        score++;
+        spawnFood();
+      } else {
+        snake.pop();
+      }
+    }
+
+    function renderSnake() {
+      snakeGame.innerHTML = '';
+      snake.forEach(segment => {
+        const snakeSegment = document.createElement('div');
+        snakeSegment.style.position = 'absolute';
+        snakeSegment.style.width = '10px';
+        snakeSegment.style.height = '10px';
+        snakeSegment.style.backgroundColor = 'green';
+        snakeSegment.style.left = `${segment.x * 10}px`;
+        snakeSegment.style.top = `${segment.y * 10}px`;
+        snakeGame.appendChild(snakeSegment);
+      });
+      snakeStatus.innerText = `Score: ${score}`;
+    }
+
+    function renderFood() {
+      const foodElement = document.createElement('div');
+      foodElement.style.position = 'absolute';
+      foodElement.style.width = '10px';
+      foodElement.style.height = '10px';
+      foodElement.style.backgroundColor = 'red';
+      foodElement.style.left = `${food.x * 10}px`;
+      foodElement.style.top = `${food.y * 10}px`;
+      snakeGame.appendChild(foodElement);
+    }
+
+    function spawnFood() {
+      food = { x: Math.floor(Math.random() * 30), y: Math.floor(Math.random() * 30) };
+    }
+
+    function handleSnakeDirection(event) {
+      if (event.key === 'ArrowUp' && direction !== 'DOWN') direction = 'UP';
+      if (event.key === 'ArrowDown' && direction !== 'UP') direction = 'DOWN';
+      if (event.key === 'ArrowLeft' && direction !== 'RIGHT') direction = 'LEFT';
+      if (event.key === 'ArrowRight' && direction !== 'LEFT') direction = 'RIGHT';
+    }
+
+    function checkCollisions() {
+      const head = snake[0];
+      if (head.x < 0 || head.y < 0 || head.x >= 30 || head.y >= 30 || snake.slice(1).some(segment => segment.x === head.x && segment.y === head.y)) {
+        clearInterval(gameInterval);
+        alert('Game Over! You collided!');
+        resetSnake();
+      }
+    }
+
+    function resetSnake() {
+      startSnake();
+    }
+
+    /* ================================================
+                   MEMORY GAME
+    ================================================== */
+
+    let memoryCards, flippedCards, matchedPairs;
+    const memoryGameElement = document.getElementById('memory-game');
+    const memoryStatus = document.getElementById('memory-status');
+
+    function startMemoryGame() {
+      memoryCards = generateMemoryCards();
+      flippedCards = [];
+      matchedPairs = 0;
+      memoryGameElement.innerHTML = '';
+      memoryCards.forEach(card => {
+        const cardElement = document.createElement('div');
+        cardElement.classList.add('memory-card');
+        cardElement.dataset.cardValue = card;
+        cardElement.onclick = () => handleMemoryCardClick(cardElement);
+        memoryGameElement.appendChild(cardElement);
+      });
+      memoryStatus.innerText = `Flipped: 0`;
+    }
+
+    function generateMemoryCards() {
+      const pairs = ['A', 'B', 'C', 'D', 'E', 'F'];
+      let cards = [...pairs, ...pairs];
+      return cards.sort(() => Math.random() - 0.5);
+    }
+
+    function handleMemoryCardClick(cardElement) {
+      if (flippedCards.length < 2 && !cardElement.classList.contains('flipped')) {
+        flippedCards.push(cardElement);
+        cardElement.classList.add('flipped');
+        cardElement.innerText = cardElement.dataset.cardValue;
+        if (flippedCards.length === 2) {
+          setTimeout(checkMemoryMatch, 500);
+        }
+      }
+    }
+
+    function checkMemoryMatch() {
+      if (flippedCards[0].dataset.cardValue === flippedCards[1].dataset.cardValue) {
+        matchedPairs++;
+        if (matchedPairs === 6) {
+          alert('You win!');
+          resetMemory();
+        }
+      } else {
+        flippedCards[0].classList.remove('flipped');
+        flippedCards[1].classList.remove('flipped');
+      }
+      flippedCards = [];
+      memoryStatus.innerText = `Flipped: ${matchedPairs}`;
+    }
+
+    function resetMemory() {
+      startMemoryGame();
+    }
+  </script>
 </body>
 </html>
