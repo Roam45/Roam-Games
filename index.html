@@ -1,443 +1,250 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chime - Play Your Favorite Games</title>
-  <style>
-    /* General Styles */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Simple Games</title>
+    <style>
+        /* Global styles */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #ff7e5f, #feb47b);
+            color: #fff;
+            text-align: center;
+        }
 
-    body {
-      font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #4a90e2, #357ab7); /* Linear gradient background */
-      color: white;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
+        h1 {
+            margin-bottom: 20px;
+            font-size: 3rem;
+        }
 
-    header {
-      background-color: #333;
-      color: white;
-      padding: 15px;
-      text-align: center;
-    }
+        .game-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-gap: 10px;
+            width: 250px;
+            margin-top: 30px;
+        }
 
-    header nav ul {
-      list-style-type: none;
-    }
+        .game-button {
+            background-color: #fff;
+            color: #333;
+            font-size: 1.5rem;
+            padding: 30px;
+            border: 2px solid #fff;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+        }
 
-    header nav ul li {
-      display: inline;
-      margin: 0 15px;
-    }
+        .game-button:hover {
+            background-color: #feb47b;
+            transform: scale(1.1);
+        }
 
-    header nav ul li a {
-      color: white;
-      text-decoration: none;
-    }
+        /* Tic-Tac-Toe styles */
+        .tic-tac-toe-board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 5px;
+            max-width: 200px;
+            margin: 30px auto;
+        }
 
-    main {
-      flex-grow: 1;
-      padding: 20px;
-      text-align: center;
-    }
+        .tic-tac-toe-cell {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #fff;
+            color: #333;
+            font-size: 2rem;
+            border: 2px solid #333;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
 
-    footer {
-      text-align: center;
-      padding: 10px;
-      background-color: #333;
-      color: white;
-    }
+        .tic-tac-toe-cell:hover {
+            background-color: #feb47b;
+        }
 
-    .game-list {
-      display: flex;
-      justify-content: center;
-      margin-top: 20px;
-    }
+        /* Modal popup styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
 
-    .game {
-      text-align: center;
-      margin: 0 15px;
-      cursor: pointer;
-    }
+        .modal-content {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            color: #333;
+        }
 
-    .game img {
-      width: 100px;
-      height: 100px;
-      border-radius: 8px;
-    }
+        .modal-content button {
+            background-color: #ff7e5f;
+            color: #fff;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
 
-    #game-container {
-      margin-top: 50px;
-    }
+        .modal-content button:hover {
+            background-color: #feb47b;
+        }
 
-    button {
-      background-color: #4a90e2;
-      color: white;
-      border: none;
-      padding: 10px;
-      margin: 5px;
-      cursor: pointer;
-      border-radius: 5px;
-    }
+        .show {
+            display: flex;
+        }
 
-    button:hover {
-      background-color: #357ab7;
-    }
-
-    .game-status {
-      margin-top: 20px;
-    }
-
-    /* Tic Tac Toe Styles */
-    .ttt-board {
-      display: grid;
-      grid-template-columns: repeat(3, 100px);
-      grid-gap: 5px;
-      justify-content: center;
-      margin: 20px auto;
-    }
-    .ttt-cell {
-      width: 100px;
-      height: 100px;
-      background-color: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 2rem;
-      cursor: pointer;
-      border: 2px solid #4a90e2;
-      color: #333;
-    }
-
-    /* Snake Styles */
-    #snake-game {
-      width: 300px;
-      height: 300px;
-      background-color: #fff;
-      margin: 20px auto;
-      border: 2px solid #4a90e2;
-    }
-    .snake { background-color: #4a90e2; }
-    .food { background-color: red; }
-
-    /* Memory Game Styles */
-    .memory-game {
-      display: grid;
-      grid-template-columns: repeat(4, 80px);
-      grid-gap: 10px;
-      justify-content: center;
-      margin-top: 20px;
-    }
-    .memory-card {
-      width: 80px;
-      height: 80px;
-      background-color: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 2rem;
-      border: 2px solid #4a90e2;
-      cursor: pointer;
-    }
-  </style>
+    </style>
 </head>
 <body>
 
-  <header>
-    <h1>Welcome to Chime</h1>
-    <nav>
-      <ul>
-        <li><a href="#home" onclick="showHomePage()">Home</a></li>
-        <li><a href="#game1" onclick="startGame('ticTacToe')">Tic-Tac-Toe</a></li>
-        <li><a href="#game2" onclick="startGame('snake')">Snake</a></li>
-        <li><a href="#game3" onclick="startGame('memory')">Memory Game</a></li>
-      </ul>
-    </nav>
-  </header>
-
-  <main id="main-content">
-    <!-- Homepage Content -->
-    <div id="home" class="home-content">
-      <h2>Featured Games</h2>
-      <div class="game-list">
-        <div class="game" onclick="startGame('ticTacToe')">
-          <img src="https://via.placeholder.com/100" alt="Tic Tac Toe">
-          <h3>Tic-Tac-Toe</h3>
+    <div>
+        <h1>Simple Games</h1>
+        <div class="game-container">
+            <button class="game-button" onclick="startTicTacToe()">Tic-Tac-Toe</button>
+            <button class="game-button" onclick="startRockPaperScissors()">Rock-Paper-Scissors</button>
+            <button class="game-button" onclick="alert('Other games coming soon!')">Other Games</button>
         </div>
-        <div class="game" onclick="startGame('snake')">
-          <img src="https://via.placeholder.com/100" alt="Snake">
-          <h3>Snake</h3>
+
+        <!-- Tic-Tac-Toe Game -->
+        <div id="tic-tac-toe" style="display: none;">
+            <h2>Tic-Tac-Toe</h2>
+            <div class="tic-tac-toe-board" id="board">
+                <div class="tic-tac-toe-cell" onclick="makeMove(0)"></div>
+                <div class="tic-tac-toe-cell" onclick="makeMove(1)"></div>
+                <div class="tic-tac-toe-cell" onclick="makeMove(2)"></div>
+                <div class="tic-tac-toe-cell" onclick="makeMove(3)"></div>
+                <div class="tic-tac-toe-cell" onclick="makeMove(4)"></div>
+                <div class="tic-tac-toe-cell" onclick="makeMove(5)"></div>
+                <div class="tic-tac-toe-cell" onclick="makeMove(6)"></div>
+                <div class="tic-tac-toe-cell" onclick="makeMove(7)"></div>
+                <div class="tic-tac-toe-cell" onclick="makeMove(8)"></div>
+            </div>
+            <button onclick="resetTicTacToe()">Reset</button>
         </div>
-        <div class="game" onclick="startGame('memory')">
-          <img src="https://via.placeholder.com/100" alt="Memory Game">
-          <h3>Memory Game</h3>
+
+        <!-- Rock Paper Scissors -->
+        <div id="rock-paper-scissors" style="display: none;">
+            <h2>Rock Paper Scissors</h2>
+            <button onclick="playRPS('rock')">Rock</button>
+            <button onclick="playRPS('paper')">Paper</button>
+            <button onclick="playRPS('scissors')">Scissors</button>
+            <div id="rps-result"></div>
         </div>
-      </div>
+
+        <!-- Modal -->
+        <div id="modal" class="modal">
+            <div class="modal-content">
+                <h3 id="modal-text"></h3>
+                <button onclick="closeModal()">Close</button>
+            </div>
+        </div>
     </div>
 
-    <!-- Tic-Tac-Toe Game -->
-    <div id="ticTacToe" class="game-content" style="display: none;">
-      <h2>Tic-Tac-Toe</h2>
-      <div class="ttt-board" id="ttt-board"></div>
-      <button onclick="resetTicTacToe()">Reset</button>
-      <p id="ttt-status" class="game-status">Player X's turn</p>
-    </div>
+    <script>
+        let currentPlayer = 'X';
+        let gameBoard = ['', '', '', '', '', '', '', '', ''];
 
-    <!-- Snake Game -->
-    <div id="snake" class="game-content" style="display: none;">
-      <h2>Snake</h2>
-      <div id="snake-game"></div>
-      <button onclick="resetSnake()">Reset</button>
-      <p id="snake-status" class="game-status">Score: 0</p>
-    </div>
-
-    <!-- Memory Game -->
-    <div id="memory" class="game-content" style="display: none;">
-      <h2>Memory Game</h2>
-      <div class="memory-game" id="memory-game"></div>
-      <button onclick="resetMemory()">Reset</button>
-      <p id="memory-status" class="game-status">Flipped: 0</p>
-    </div>
-  </main>
-
-  <footer>
-    <p>&copy; 2024 Chime Games</p>
-  </footer>
-
-  <script>
-    // General function to switch between home and game page
-    function showHomePage() {
-      document.getElementById('home').style.display = 'block';
-      document.getElementById('ticTacToe').style.display = 'none';
-      document.getElementById('snake').style.display = 'none';
-      document.getElementById('memory').style.display = 'none';
-    }
-
-    // Function to start the selected game
-    function startGame(game) {
-      showHomePage(); // Hide all games first
-      document.getElementById(game).style.display = 'block';
-      if (game === 'ticTacToe') {
-        startTicTacToe();
-      } else if (game === 'snake') {
-        startSnake();
-      } else if (game === 'memory') {
-        startMemoryGame();
-      }
-    }
-
-    /* ================================================
-                   TIC-TAC-TOE GAME
-    ================================================== */
-
-    let currentPlayer = 'X';
-    let board = ['', '', '', '', '', '', '', '', ''];
-    const boardElement = document.getElementById('ttt-board');
-    const statusElement = document.getElementById('ttt-status');
-
-    function startTicTacToe() {
-      // Render the board
-      boardElement.innerHTML = '';
-      board.forEach((cell, index) => {
-        const cellElement = document.createElement('div');
-        cellElement.classList.add('ttt-cell');
-        cellElement.innerText = cell;
-        cellElement.onclick = () => handleTicTacToeClick(index);
-        boardElement.appendChild(cellElement);
-      });
-      statusElement.innerText = `Player ${currentPlayer}'s turn`;
-    }
-
-    function handleTicTacToeClick(index) {
-      if (board[index] === '') {
-        board[index] = currentPlayer;
-        currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-        startTicTacToe();
-        checkWinner();
-      }
-    }
-
-    function checkWinner() {
-      const winningCombinations = [
-        [0, 1, 2], [3, 4, 5], [6, 7, 8],
-        [0, 3, 6], [1, 4, 7], [2, 5, 8],
-        [0, 4, 8], [2, 4, 6]
-      ];
-      for (let combo of winningCombinations) {
-        const [a, b, c] = combo;
-        if (board[a] && board[a] === board[b] && board[a] === board[c]) {
-          statusElement.innerText = `${board[a]} wins!`;
-          return;
+        function startTicTacToe() {
+            document.getElementById('tic-tac-toe').style.display = 'block';
+            document.getElementById('rock-paper-scissors').style.display = 'none';
+            resetTicTacToe();
         }
-      }
-      if (!board.includes('')) {
-        statusElement.innerText = 'It\'s a draw!';
-      }
-    }
 
-    function resetTicTacToe() {
-      board = ['', '', '', '', '', '', '', '', ''];
-      currentPlayer = 'X';
-      startTicTacToe();
-    }
-
-    /* ================================================
-                   SNAKE GAME
-    ================================================== */
-
-    let snake, food, direction, score;
-    const snakeGame = document.getElementById('snake-game');
-    const snakeStatus = document.getElementById('snake-status');
-
-    function startSnake() {
-      snake = [{ x: 10, y: 10 }];
-      direction = 'RIGHT';
-      score = 0;
-      spawnFood();
-      document.addEventListener('keydown', handleSnakeDirection);
-      gameLoop();
-    }
-
-    function gameLoop() {
-      const gameInterval = setInterval(() => {
-        moveSnake();
-        checkCollisions();
-        renderSnake();
-        renderFood();
-      }, 100);
-    }
-
-    function moveSnake() {
-      const head = { ...snake[0] };
-      if (direction === 'UP') head.y--;
-      if (direction === 'DOWN') head.y++;
-      if (direction === 'LEFT') head.x--;
-      if (direction === 'RIGHT') head.x++;
-      snake.unshift(head);
-      if (head.x === food.x && head.y === food.y) {
-        score++;
-        spawnFood();
-      } else {
-        snake.pop();
-      }
-    }
-
-    function renderSnake() {
-      snakeGame.innerHTML = '';
-      snake.forEach(segment => {
-        const snakeSegment = document.createElement('div');
-        snakeSegment.style.position = 'absolute';
-        snakeSegment.style.width = '10px';
-        snakeSegment.style.height = '10px';
-        snakeSegment.style.backgroundColor = 'green';
-        snakeSegment.style.left = `${segment.x * 10}px`;
-        snakeSegment.style.top = `${segment.y * 10}px`;
-        snakeGame.appendChild(snakeSegment);
-      });
-      snakeStatus.innerText = `Score: ${score}`;
-    }
-
-    function renderFood() {
-      const foodElement = document.createElement('div');
-      foodElement.style.position = 'absolute';
-      foodElement.style.width = '10px';
-      foodElement.style.height = '10px';
-      foodElement.style.backgroundColor = 'red';
-      foodElement.style.left = `${food.x * 10}px`;
-      foodElement.style.top = `${food.y * 10}px`;
-      snakeGame.appendChild(foodElement);
-    }
-
-    function spawnFood() {
-      food = { x: Math.floor(Math.random() * 30), y: Math.floor(Math.random() * 30) };
-    }
-
-    function handleSnakeDirection(event) {
-      if (event.key === 'ArrowUp' && direction !== 'DOWN') direction = 'UP';
-      if (event.key === 'ArrowDown' && direction !== 'UP') direction = 'DOWN';
-      if (event.key === 'ArrowLeft' && direction !== 'RIGHT') direction = 'LEFT';
-      if (event.key === 'ArrowRight' && direction !== 'LEFT') direction = 'RIGHT';
-    }
-
-    function checkCollisions() {
-      const head = snake[0];
-      if (head.x < 0 || head.y < 0 || head.x >= 30 || head.y >= 30 || snake.slice(1).some(segment => segment.x === head.x && segment.y === head.y)) {
-        clearInterval(gameInterval);
-        alert('Game Over! You collided!');
-        resetSnake();
-      }
-    }
-
-    function resetSnake() {
-      startSnake();
-    }
-
-    /* ================================================
-                   MEMORY GAME
-    ================================================== */
-
-    let memoryCards, flippedCards, matchedPairs;
-    const memoryGameElement = document.getElementById('memory-game');
-    const memoryStatus = document.getElementById('memory-status');
-
-    function startMemoryGame() {
-      memoryCards = generateMemoryCards();
-      flippedCards = [];
-      matchedPairs = 0;
-      memoryGameElement.innerHTML = '';
-      memoryCards.forEach(card => {
-        const cardElement = document.createElement('div');
-        cardElement.classList.add('memory-card');
-        cardElement.dataset.cardValue = card;
-        cardElement.onclick = () => handleMemoryCardClick(cardElement);
-        memoryGameElement.appendChild(cardElement);
-      });
-      memoryStatus.innerText = `Flipped: 0`;
-    }
-
-    function generateMemoryCards() {
-      const pairs = ['A', 'B', 'C', 'D', 'E', 'F'];
-      let cards = [...pairs, ...pairs];
-      return cards.sort(() => Math.random() - 0.5);
-    }
-
-    function handleMemoryCardClick(cardElement) {
-      if (flippedCards.length < 2 && !cardElement.classList.contains('flipped')) {
-        flippedCards.push(cardElement);
-        cardElement.classList.add('flipped');
-        cardElement.innerText = cardElement.dataset.cardValue;
-        if (flippedCards.length === 2) {
-          setTimeout(checkMemoryMatch, 500);
+        function startRockPaperScissors() {
+            document.getElementById('rock-paper-scissors').style.display = 'block';
+            document.getElementById('tic-tac-toe').style.display = 'none';
+            document.getElementById('rps-result').textContent = '';
         }
-      }
-    }
 
-    function checkMemoryMatch() {
-      if (flippedCards[0].dataset.cardValue === flippedCards[1].dataset.cardValue) {
-        matchedPairs++;
-        if (matchedPairs === 6) {
-          alert('You win!');
-          resetMemory();
+        function makeMove(index) {
+            if (gameBoard[index] === '') {
+                gameBoard[index] = currentPlayer;
+                document.getElementsByClassName('tic-tac-toe-cell')[index].textContent = currentPlayer;
+                checkWinner();
+                currentPlayer = (currentPlayer === 'X') ? 'O' : 'X';
+            }
         }
-      } else {
-        flippedCards[0].classList.remove('flipped');
-        flippedCards[1].classList.remove('flipped');
-      }
-      flippedCards = [];
-      memoryStatus.innerText = `Flipped: ${matchedPairs}`;
-    }
 
-    function resetMemory() {
-      startMemoryGame();
-    }
-  </script>
+        function checkWinner() {
+            const winPatterns = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8], // rows
+                [0, 3, 6], [1, 4, 7], [2, 5, 8], // columns
+                [0, 4, 8], [2, 4, 6]              // diagonals
+            ];
+
+            for (let pattern of winPatterns) {
+                const [a, b, c] = pattern;
+                if (gameBoard[a] && gameBoard[a] === gameBoard[b] && gameBoard[a] === gameBoard[c]) {
+                    showModal(`${gameBoard[a]} Wins!`);
+                    return;
+                }
+            }
+
+            if (!gameBoard.includes('')) {
+                showModal('It\'s a Draw!');
+            }
+        }
+
+        function resetTicTacToe() {
+            gameBoard = ['', '', '', '', '', '', '', '', ''];
+            const cells = document.getElementsByClassName('tic-tac-toe-cell');
+            for (let cell of cells) {
+                cell.textContent = '';
+            }
+        }
+
+        function showModal(message) {
+            document.getElementById('modal-text').textContent = message;
+            document.getElementById('modal').classList.add('show');
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.remove('show');
+            resetTicTacToe();
+        }
+
+        // Rock Paper Scissors Game
+        function playRPS(playerChoice) {
+            const choices = ['rock', 'paper', 'scissors'];
+            const computerChoice = choices[Math.floor(Math.random() * 3)];
+            const result = determineRPSWinner(playerChoice, computerChoice);
+            document.getElementById('rps-result').textContent = `You chose ${playerChoice}, Computer chose ${computerChoice}. ${result}`;
+        }
+
+        function determineRPSWinner(playerChoice, computerChoice) {
+            if (playerChoice === computerChoice) return 'It\'s a Draw!';
+            if (
+                (playerChoice === 'rock' && computerChoice === 'scissors') ||
+                (playerChoice === 'paper' && computerChoice === 'rock') ||
+                (playerChoice === 'scissors' && computerChoice === 'paper')
+            ) {
+                return 'You Win!';
+            } else {
+                return 'You Lose!';
+            }
+        }
+    </script>
 </body>
 </html>
