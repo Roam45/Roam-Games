@@ -34,7 +34,6 @@
       animation: fadeIn 1s ease-out;
     }
 
-    /* Button styling */
     button {
       padding: 10px 20px;
       font-size: 16px;
@@ -84,37 +83,6 @@
       font-weight: bold;
       transition: transform 0.5s ease-in-out;
     }
-
-    #tierInfo {
-      font-size: 18px;
-      margin-top: 20px;
-      font-weight: bold;
-    }
-
-    #tierLevel {
-      font-size: 24px;
-    }
-
-    /* Animations */
-    @keyframes fadeIn {
-      0% {
-        opacity: 0;
-      }
-      100% {
-        opacity: 1;
-      }
-    }
-
-    @keyframes rebirthAnimation {
-      0% {
-        transform: scale(0);
-        opacity: 0;
-      }
-      100% {
-        transform: scale(1);
-        opacity: 1;
-      }
-    }
   </style>
 </head>
 <body>
@@ -122,7 +90,6 @@
   <div id="introScreen" class="intro-container">
     <h1>Welcome to Button Clicking Simulator!</h1>
     <p>This is a simple game where you click the button to earn points and gamble them to try your luck.</p>
-    <p>Each tier upgrade requires more points, and with each tier, you'll get different button colors.</p>
     <button id="startButton">Start Game</button>
   </div>
 
@@ -140,45 +107,39 @@
     <button id="gambleButton">Gamble</button>
     <p id="gambleResult"></p>
 
-    <h2>Tier Information</h2>
-    <p>Current Tier: <span id="tierLevel">1</span></p>
-
-    <!-- Buy Tier and Rebirth Buttons -->
-    <button id="buyTierButton">Buy Tier (Cost: 500 points)</button>
-    <button id="rebirthButton">Rebirth (Cost: 1000 points)</button>
+    <h2>Upgrades</h2>
+    <p>Current Multiplier: <span id="multiplier">1</span></p>
+    <button id="buyMultiplierButton">Buy Multiplier (Cost: 50 points)</button>
+    <button id="buyAutoClickerButton">Buy Auto Clicker (Cost: 200 points)</button>
   </div>
 
   <script>
     // Initialize variables
     let points = parseInt(localStorage.getItem('points')) || 0;
-    let tier = parseInt(localStorage.getItem('tier')) || 1;
-    let pointsPerClick = parseInt(localStorage.getItem('pointsPerClick')) || 1;
-    let rebirthCost = tier * 1000; // Cost for rebirth increases with tier
-    let tierUpgradeCost = 500; // Flat cost to buy a new tier
+    let multiplier = parseInt(localStorage.getItem('multiplier')) || 1;
+    let autoClickerActive = localStorage.getItem('autoClickerActive') === 'true';
+    let pointsPerClick = multiplier;
 
     // DOM Elements
     const pointsDisplay = document.getElementById('points');
-    const tierDisplay = document.getElementById('tierLevel');
     const clickButton = document.getElementById('clickButton');
     const gambleButton = document.getElementById('gambleButton');
     const betAmountInput = document.getElementById('betAmount');
     const gambleResult = document.getElementById('gambleResult');
-    const rebirthButton = document.getElementById('rebirthButton');
-    const buyTierButton = document.getElementById('buyTierButton');
+    const buyMultiplierButton = document.getElementById('buyMultiplierButton');
+    const buyAutoClickerButton = document.getElementById('buyAutoClickerButton');
+    const multiplierDisplay = document.getElementById('multiplier');
     const startButton = document.getElementById('startButton');
     const gameContainer = document.getElementById('gameContainer');
     const introScreen = document.getElementById('introScreen');
 
-    // Update the points, tier, and button labels on the screen
+    // Update the points and multiplier information on the screen
     function updatePoints() {
       pointsDisplay.textContent = points;
-      tierDisplay.textContent = tier;
-      rebirthCost = tier * 1000;
-      rebirthButton.textContent = `Rebirth (Cost: ${rebirthCost} points)`;
-      buyTierButton.textContent = `Buy Tier (Cost: ${tierUpgradeCost} points)`;
+      multiplierDisplay.textContent = multiplier;
       localStorage.setItem('points', points);
-      localStorage.setItem('tier', tier);
-      localStorage.setItem('pointsPerClick', pointsPerClick);
+      localStorage.setItem('multiplier', multiplier);
+      localStorage.setItem('autoClickerActive', autoClickerActive);
     }
 
     // Start the game
@@ -186,6 +147,11 @@
       introScreen.style.display = 'none';
       gameContainer.style.display = 'block';
       updatePoints();
+
+      // Start auto-clicker if it's active
+      if (autoClickerActive) {
+        startAutoClicker();
+      }
     });
 
     // Button click event to earn points
@@ -218,29 +184,43 @@
       updatePoints();
     });
 
-    // Buy Tier function
-    buyTierButton.addEventListener('click', () => {
-      if (points >= tierUpgradeCost) {
-        points -= tierUpgradeCost;
-        tier++;
-        pointsPerClick = tier; // Increase points per click with each tier
+    // Buy multiplier function
+    buyMultiplierButton.addEventListener('click', () => {
+      const multiplierCost = 50;
+      if (points >= multiplierCost) {
+        points -= multiplierCost;
+        multiplier++;
+        pointsPerClick = multiplier; // Update points per click based on multiplier
         updatePoints();
       } else {
-        alert("You don't have enough points to buy a new tier!");
+        alert("You don't have enough points to buy a multiplier!");
       }
     });
 
-    // Rebirth function
-    rebirthButton.addEventListener('click', () => {
-      if (points >= rebirthCost) {
-        points -= rebirthCost;
-        tier++;
-        pointsPerClick = tier;
+    // Buy auto-clicker function
+    buyAutoClickerButton.addEventListener('click', () => {
+      const autoClickerCost = 200;
+      if (!autoClickerActive && points >= autoClickerCost) {
+        points -= autoClickerCost;
+        autoClickerActive = true;
         updatePoints();
+        startAutoClicker();
+      } else if (autoClickerActive) {
+        alert("Auto Clicker is already active!");
       } else {
-        alert("You don't have enough points for rebirth!");
+        alert("You don't have enough points to buy the auto-clicker!");
       }
     });
+
+    // Auto-clicker function (clicks every 2 seconds)
+    function startAutoClicker() {
+      setInterval(() => {
+        if (autoClickerActive) {
+          points += pointsPerClick;
+          updatePoints();
+        }
+      }, 2000); // 2 seconds
+    }
   </script>
 </body>
 </html>
