@@ -5,7 +5,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Button Clicking Simulator</title>
   <style>
-    /* Basic styling */
+    /* Rotating, color-changing background */
+    @keyframes rotateGradient {
+      0% {
+        background: linear-gradient(45deg, #ff6a00, #f44336);
+      }
+      25% {
+        background: linear-gradient(135deg, #ff6a00, #4CAF50);
+      }
+      50% {
+        background: linear-gradient(225deg, #2196f3, #ff9800);
+      }
+      75% {
+        background: linear-gradient(315deg, #673ab7, #e91e63);
+      }
+      100% {
+        background: linear-gradient(405deg, #ff6a00, #f44336);
+      }
+    }
+
     body {
       font-family: Arial, sans-serif;
       margin: 0;
@@ -14,19 +32,24 @@
       justify-content: center;
       align-items: center;
       height: 100vh;
-      background: linear-gradient(45deg, #ff6a00, #f44336);
+      animation: rotateGradient 15s linear infinite;
+      background-size: 200% 200%;
     }
+
+    /* Styling for game container */
     .container {
       text-align: center;
-      background-color: #fff;
+      background-color: rgba(255, 255, 255, 0.9);
       padding: 20px;
       border-radius: 10px;
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
       width: 400px;
     }
+
     h1, h2 {
       color: #333;
     }
+    
     button {
       padding: 10px 20px;
       font-size: 16px;
@@ -37,22 +60,34 @@
       cursor: pointer;
       margin-top: 15px;
     }
+
     button:hover {
       background-color: #45a049;
     }
+
     #points {
       font-size: 24px;
       font-weight: bold;
     }
+
     /* Style for input fields */
     input[type="number"] {
       padding: 10px;
       font-size: 16px;
-      margin-top: 10px;
       border-radius: 5px;
       border: 1px solid #ccc;
-      width: calc(100% - 24px);
+      width: 100px;
+      margin-right: 10px;
     }
+
+    /* Flex container for gamble input and button */
+    .gamble-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 15px;
+    }
+
     #gambleResult {
       font-weight: bold;
       margin-top: 10px;
@@ -80,58 +115,44 @@
 
     <h2>Gambling</h2>
     <p>Bet your points for a chance to double them!</p>
-    <input type="number" id="betAmount" placeholder="Enter bet amount" min="1">
-    <button id="gambleButton">Gamble</button>
+    <div class="gamble-container">
+      <input type="number" id="betAmount" placeholder="Enter bet amount" min="1">
+      <button id="gambleButton">Gamble</button>
+    </div>
     <p id="gambleResult"></p>
   </div>
 
   <script>
-    let points = parseInt(localStorage.getItem('points')) || 0;
-    let multiplier = parseInt(localStorage.getItem('multiplier')) || 1;
-    let autoClickerCount = parseInt(localStorage.getItem('autoClickerCount')) || 0;
-    let offlineEarnings = parseInt(localStorage.getItem('offlineEarnings')) || 0;
-    let offlineEarningsCost = parseInt(localStorage.getItem('offlineEarningsCost')) || 500;
+    // Game variables
+    let points = 0;
+    let multiplier = 1;
+    let autoClickerCount = 0;
+    let offlineEarnings = 0;
+    let offlineEarningsCost = 500;
 
+    // Update UI elements
     const pointsDisplay = document.getElementById('points');
+    const startButton = document.getElementById('startButton');
+    const gameContainer = document.getElementById('gameContainer');
+    const introScreen = document.getElementById('introScreen');
     const clickButton = document.getElementById('clickButton');
     const buyMultiplierButton = document.getElementById('buyMultiplierButton');
     const buyAutoClickerButton = document.getElementById('buyAutoClickerButton');
     const buyOfflineEarningsButton = document.getElementById('buyOfflineEarningsButton');
-    const multiplierDisplay = document.getElementById('multiplier');
     const multiplierCostDisplay = document.getElementById('multiplierCost');
-    const autoClickerCountDisplay = document.getElementById('autoClickerCount');
-    const offlineEarningsDisplay = document.getElementById('offlineEarnings');
-    const offlineEarningsCostDisplay = document.getElementById('offlineEarningsCost');
-    const startButton = document.getElementById('startButton');
-    const gameContainer = document.getElementById('gameContainer');
-    const introScreen = document.getElementById('introScreen');
-
     const gambleButton = document.getElementById('gambleButton');
     const betAmountInput = document.getElementById('betAmount');
     const gambleResult = document.getElementById('gambleResult');
 
-    let autoClickerInterval;
-    let offlineEarningsInterval;
-
     function updateUI() {
       pointsDisplay.textContent = points;
-      multiplierDisplay.textContent = multiplier;
-      autoClickerCountDisplay.textContent = autoClickerCount;
-      offlineEarningsDisplay.textContent = offlineEarnings;
-      offlineEarningsCostDisplay.textContent = offlineEarningsCost;
       multiplierCostDisplay.textContent = multiplier * 50;
-      localStorage.setItem('points', points);
-      localStorage.setItem('multiplier', multiplier);
-      localStorage.setItem('autoClickerCount', autoClickerCount);
-      localStorage.setItem('offlineEarnings', offlineEarnings);
-      localStorage.setItem('offlineEarningsCost', offlineEarningsCost);
     }
 
     startButton.addEventListener('click', () => {
       introScreen.style.display = 'none';
       gameContainer.style.display = 'block';
       updateUI();
-      startAutoClickers();
     });
 
     clickButton.addEventListener('click', () => {
@@ -155,8 +176,10 @@
       if (points >= autoClickerCost) {
         points -= autoClickerCost;
         autoClickerCount++;
-        updateUI();
-        startAutoClickers();
+        setInterval(() => {
+          points += multiplier;
+          updateUI();
+        }, 2000);
       } else {
         alert("Not enough points to buy auto clicker!");
       }
@@ -173,41 +196,6 @@
       }
     });
 
-    function startAutoClickers() {
-      clearInterval(autoClickerInterval);
-      if (autoClickerCount > 0) {
-        autoClickerInterval = setInterval(() => {
-          points += multiplier * autoClickerCount;
-          updateUI();
-        }, 2000);
-      }
-    }
-
-    function startOfflineEarnings() {
-      offlineEarningsInterval = setInterval(() => {
-        points += offlineEarnings;
-        updateUI();
-      }, 60000); // Adds offline earnings every 1 minute
-    }
-
-    function stopOfflineEarnings() {
-      clearInterval(offlineEarningsInterval);
-    }
-
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'hidden') {
-        stopAutoClickers();
-        startOfflineEarnings();
-      } else {
-        stopOfflineEarnings();
-        startAutoClickers();
-      }
-    });
-
-    function stopAutoClickers() {
-      clearInterval(autoClickerInterval);
-    }
-
     gambleButton.addEventListener('click', () => {
       const betAmount = parseInt(betAmountInput.value);
       if (isNaN(betAmount) || betAmount <= 0 || betAmount > points) {
@@ -216,10 +204,9 @@
         return;
       }
       points -= betAmount;
-      const win = Math.random() < 0.5;
-      if (win) {
+      if (Math.random() < 0.5) {
         points += betAmount * 2;
-        gambleResult.textContent = `You won! You now have ${betAmount * 2} points!`;
+        gambleResult.textContent = `You won! You now have ${points} points!`;
         gambleResult.style.color = "green";
       } else {
         gambleResult.textContent = `You lost ${betAmount} points.`;
