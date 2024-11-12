@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Button Clicking Simulator & Gambling</title>
   <style>
+    /* Gradient background for the whole page */
     body {
       font-family: Arial, sans-serif;
       margin: 0;
@@ -13,8 +14,8 @@
       justify-content: center;
       align-items: center;
       height: 100vh;
+      background: linear-gradient(45deg, #ff6a00, #f44336); /* Gradient from orange to red */
       transition: background-color 0.5s ease;
-      background-color: #4caf50;
     }
 
     .container {
@@ -33,6 +34,7 @@
       animation: fadeIn 1s ease-out;
     }
 
+    /* Button styling */
     button {
       padding: 10px 20px;
       font-size: 16px;
@@ -41,12 +43,13 @@
       border: none;
       border-radius: 5px;
       cursor: pointer;
-      transition: background-color 0.3s;
+      transition: transform 0.2s ease, background-color 0.3s;
       margin-top: 15px;
-      animation: bounce 0.5s ease infinite alternate;
     }
 
+    /* Expand effect on hover */
     button:hover {
+      transform: scale(1.1); /* Slightly increase the button size */
       background-color: #45a049;
     }
 
@@ -89,6 +92,10 @@
       font-weight: bold;
     }
 
+    #tierLevel {
+      font-size: 24px;
+    }
+
     /* Tier Animations */
     @keyframes fadeIn {
       0% {
@@ -96,18 +103,6 @@
       }
       100% {
         opacity: 1;
-      }
-    }
-
-    @keyframes bounce {
-      0% {
-        transform: translateY(0);
-      }
-      50% {
-        transform: translateY(-10px);
-      }
-      100% {
-        transform: translateY(0);
       }
     }
 
@@ -122,23 +117,22 @@
       }
     }
 
-    /* Tier Background Colors */
+    /* Custom button styles for different tiers */
     .tier-1 {
-      background-color: #4caf50;
+      background-color: #4CAF50; /* Green */
     }
     .tier-2 {
-      background-color: #ff9800;
+      background-color: #ff9800; /* Orange */
     }
     .tier-3 {
-      background-color: #f44336;
+      background-color: #f44336; /* Red */
     }
     .tier-4 {
-      background-color: #9c27b0;
+      background-color: #9c27b0; /* Purple */
     }
     .tier-5 {
-      background-color: #2196f3;
+      background-color: #2196f3; /* Blue */
     }
-    /* (Add additional colors for higher tiers if desired) */
   </style>
 </head>
 <body>
@@ -175,7 +169,6 @@
     const tierLevel = document.getElementById("tierLevel");
     const tierInfo = document.getElementById("tierInfo");
     const buyTierButton = document.getElementById("buyTierButton");
-    const body = document.body;
     const container = document.querySelector(".container");
 
     // Function to update the points display
@@ -196,7 +189,6 @@
         tier = 100;
         tierLevel.textContent = `100 (Max Tier)`;
         tierInfo.textContent = "You are at the maximum tier!";
-        body.style.backgroundColor = "#9c27b0"; // Purple color for max tier
         buyTierButton.disabled = true;
         return;
       }
@@ -211,30 +203,21 @@
         buyTierButton.disabled = true;
       }
 
-      // Update tier color and background
-      switch (tier) {
-        case 1:
-          container.className = 'container tier-1';
-          break;
-        case 2:
-          container.className = 'container tier-2';
-          break;
-        case 3:
-          container.className = 'container tier-3';
-          break;
-        case 4:
-          container.className = 'container tier-4';
-          break;
-        case 5:
-          container.className = 'container tier-5';
-          break;
-        default:
-          container.className = 'container';
-          break;
-      }
-
       // Update tier display
       tierLevel.textContent = tier;
+
+      // Change the button's background color based on the current tier
+      if (tier === 1) {
+        buyTierButton.className = 'tier-1';
+      } else if (tier === 2) {
+        buyTierButton.className = 'tier-2';
+      } else if (tier === 3) {
+        buyTierButton.className = 'tier-3';
+      } else if (tier === 4) {
+        buyTierButton.className = 'tier-4';
+      } else if (tier === 5) {
+        buyTierButton.className = 'tier-5';
+      }
     }
 
     // Handle click to earn points
@@ -290,6 +273,9 @@
         updatePoints();
       }
     });
+
+    // Initial call to set everything up
+    updatePoints();
   </script>
 </body>
 </html>
