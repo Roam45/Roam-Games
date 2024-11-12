@@ -1,250 +1,151 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Simple Games</title>
-    <style>
-        /* Global styles */
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background: linear-gradient(135deg, #ff7e5f, #feb47b);
-            color: #fff;
-            text-align: center;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Button Clicking Simulator & Gambling</title>
+  <style>
+    /* Apply a linear gradient background */
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #4facfe, #00f2fe); /* Gradient from blue to cyan */
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
 
-        h1 {
-            margin-bottom: 20px;
-            font-size: 3rem;
-        }
+    .container {
+      text-align: center;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+      width: 400px;
+    }
 
-        .game-container {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            grid-gap: 10px;
-            width: 250px;
-            margin-top: 30px;
-        }
+    h1 {
+      color: #333;
+      font-size: 2em;
+    }
 
-        .game-button {
-            background-color: #fff;
-            color: #333;
-            font-size: 1.5rem;
-            padding: 30px;
-            border: 2px solid #fff;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: background-color 0.3s, transform 0.3s;
-        }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      margin-top: 15px;
+    }
 
-        .game-button:hover {
-            background-color: #feb47b;
-            transform: scale(1.1);
-        }
+    button:hover {
+      background-color: #45a049;
+    }
 
-        /* Tic-Tac-Toe styles */
-        .tic-tac-toe-board {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            grid-template-rows: repeat(3, 1fr);
-            gap: 5px;
-            max-width: 200px;
-            margin: 30px auto;
-        }
+    input {
+      padding: 10px;
+      font-size: 16px;
+      margin-top: 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      width: 80%;
+    }
 
-        .tic-tac-toe-cell {
-            width: 60px;
-            height: 60px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: #fff;
-            color: #333;
-            font-size: 2rem;
-            border: 2px solid #333;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
+    p {
+      font-size: 18px;
+      margin-top: 10px;
+    }
 
-        .tic-tac-toe-cell:hover {
-            background-color: #feb47b;
-        }
+    h2 {
+      margin-top: 30px;
+      color: #333;
+    }
 
-        /* Modal popup styles */
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            display: none;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal-content {
-            background: #fff;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-            color: #333;
-        }
-
-        .modal-content button {
-            background-color: #ff7e5f;
-            color: #fff;
-            padding: 10px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        .modal-content button:hover {
-            background-color: #feb47b;
-        }
-
-        .show {
-            display: flex;
-        }
-
-    </style>
+    #gambleResult {
+      font-weight: bold;
+      margin-top: 10px;
+    }
+  </style>
 </head>
 <body>
+  <div class="container">
+    <h1>Button Clicking Simulator & Gambling</h1>
+    <p>Current Points: <span id="points">0</span></p>
 
-    <div>
-        <h1>Simple Games</h1>
-        <div class="game-container">
-            <button class="game-button" onclick="startTicTacToe()">Tic-Tac-Toe</button>
-            <button class="game-button" onclick="startRockPaperScissors()">Rock-Paper-Scissors</button>
-            <button class="game-button" onclick="alert('Other games coming soon!')">Other Games</button>
-        </div>
+    <!-- Button Click -->
+    <button id="clickButton">Click to Earn Points</button>
 
-        <!-- Tic-Tac-Toe Game -->
-        <div id="tic-tac-toe" style="display: none;">
-            <h2>Tic-Tac-Toe</h2>
-            <div class="tic-tac-toe-board" id="board">
-                <div class="tic-tac-toe-cell" onclick="makeMove(0)"></div>
-                <div class="tic-tac-toe-cell" onclick="makeMove(1)"></div>
-                <div class="tic-tac-toe-cell" onclick="makeMove(2)"></div>
-                <div class="tic-tac-toe-cell" onclick="makeMove(3)"></div>
-                <div class="tic-tac-toe-cell" onclick="makeMove(4)"></div>
-                <div class="tic-tac-toe-cell" onclick="makeMove(5)"></div>
-                <div class="tic-tac-toe-cell" onclick="makeMove(6)"></div>
-                <div class="tic-tac-toe-cell" onclick="makeMove(7)"></div>
-                <div class="tic-tac-toe-cell" onclick="makeMove(8)"></div>
-            </div>
-            <button onclick="resetTicTacToe()">Reset</button>
-        </div>
+    <h2>Gambling Game</h2>
+    <p>Bet your points and try your luck!</p>
+    <input type="number" id="betAmount" placeholder="Enter bet amount" min="1">
+    <button id="gambleButton">Gamble</button>
+    <p id="gambleResult"></p>
+  </div>
 
-        <!-- Rock Paper Scissors -->
-        <div id="rock-paper-scissors" style="display: none;">
-            <h2>Rock Paper Scissors</h2>
-            <button onclick="playRPS('rock')">Rock</button>
-            <button onclick="playRPS('paper')">Paper</button>
-            <button onclick="playRPS('scissors')">Scissors</button>
-            <div id="rps-result"></div>
-        </div>
+  <script>
+    // Initial points
+    let points = 0;
 
-        <!-- Modal -->
-        <div id="modal" class="modal">
-            <div class="modal-content">
-                <h3 id="modal-text"></h3>
-                <button onclick="closeModal()">Close</button>
-            </div>
-        </div>
-    </div>
+    // DOM Elements
+    const pointsDisplay = document.getElementById("points");
+    const clickButton = document.getElementById("clickButton");
+    const betAmountInput = document.getElementById("betAmount");
+    const gambleButton = document.getElementById("gambleButton");
+    const gambleResult = document.getElementById("gambleResult");
 
-    <script>
-        let currentPlayer = 'X';
-        let gameBoard = ['', '', '', '', '', '', '', '', ''];
+    // Function to update the points display
+    function updatePoints() {
+      pointsDisplay.textContent = points;
+    }
 
-        function startTicTacToe() {
-            document.getElementById('tic-tac-toe').style.display = 'block';
-            document.getElementById('rock-paper-scissors').style.display = 'none';
-            resetTicTacToe();
-        }
+    // Function to handle button click to earn points
+    clickButton.addEventListener("click", () => {
+      points += 1;  // Earn 1 point per click
+      updatePoints();
+    });
 
-        function startRockPaperScissors() {
-            document.getElementById('rock-paper-scissors').style.display = 'block';
-            document.getElementById('tic-tac-toe').style.display = 'none';
-            document.getElementById('rps-result').textContent = '';
-        }
+    // Function to handle gambling
+    gambleButton.addEventListener("click", () => {
+      const betAmount = parseInt(betAmountInput.value);
 
-        function makeMove(index) {
-            if (gameBoard[index] === '') {
-                gameBoard[index] = currentPlayer;
-                document.getElementsByClassName('tic-tac-toe-cell')[index].textContent = currentPlayer;
-                checkWinner();
-                currentPlayer = (currentPlayer === 'X') ? 'O' : 'X';
-            }
-        }
+      // Check if the bet is valid
+      if (isNaN(betAmount) || betAmount <= 0) {
+        gambleResult.textContent = "Please enter a valid bet amount!";
+        gambleResult.style.color = "red";
+        return;
+      }
 
-        function checkWinner() {
-            const winPatterns = [
-                [0, 1, 2], [3, 4, 5], [6, 7, 8], // rows
-                [0, 3, 6], [1, 4, 7], [2, 5, 8], // columns
-                [0, 4, 8], [2, 4, 6]              // diagonals
-            ];
+      if (betAmount > points) {
+        gambleResult.textContent = "You don't have enough points to bet!";
+        gambleResult.style.color = "red";
+        return;
+      }
 
-            for (let pattern of winPatterns) {
-                const [a, b, c] = pattern;
-                if (gameBoard[a] && gameBoard[a] === gameBoard[b] && gameBoard[a] === gameBoard[c]) {
-                    showModal(`${gameBoard[a]} Wins!`);
-                    return;
-                }
-            }
+      // Subtract the bet amount from points
+      points -= betAmount;
+      updatePoints();
 
-            if (!gameBoard.includes('')) {
-                showModal('It\'s a Draw!');
-            }
-        }
+      // Simple coin flip gambling (50% win chance)
+      const win = Math.random() < 0.5;
 
-        function resetTicTacToe() {
-            gameBoard = ['', '', '', '', '', '', '', '', ''];
-            const cells = document.getElementsByClassName('tic-tac-toe-cell');
-            for (let cell of cells) {
-                cell.textContent = '';
-            }
-        }
+      if (win) {
+        // Win: Double the bet
+        points += betAmount * 2;
+        gambleResult.textContent = `You won! You now have ${betAmount * 2} points!`;
+        gambleResult.style.color = "green";
+      } else {
+        // Lose: No points back
+        gambleResult.textContent = `You lost your bet of ${betAmount} points.`;
+        gambleResult.style.color = "red";
+      }
 
-        function showModal(message) {
-            document.getElementById('modal-text').textContent = message;
-            document.getElementById('modal').classList.add('show');
-        }
-
-        function closeModal() {
-            document.getElementById('modal').classList.remove('show');
-            resetTicTacToe();
-        }
-
-        // Rock Paper Scissors Game
-        function playRPS(playerChoice) {
-            const choices = ['rock', 'paper', 'scissors'];
-            const computerChoice = choices[Math.floor(Math.random() * 3)];
-            const result = determineRPSWinner(playerChoice, computerChoice);
-            document.getElementById('rps-result').textContent = `You chose ${playerChoice}, Computer chose ${computerChoice}. ${result}`;
-        }
-
-        function determineRPSWinner(playerChoice, computerChoice) {
-            if (playerChoice === computerChoice) return 'It\'s a Draw!';
-            if (
-                (playerChoice === 'rock' && computerChoice === 'scissors') ||
-                (playerChoice === 'paper' && computerChoice === 'rock') ||
-                (playerChoice === 'scissors' && computerChoice === 'paper')
-            ) {
-                return 'You Win!';
-            } else {
-                return 'You Lose!';
-            }
-        }
-    </script>
+      updatePoints();
+    });
+  </script>
 </body>
 </html>
