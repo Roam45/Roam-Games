@@ -47,9 +47,8 @@
       margin-top: 15px;
     }
 
-    /* Expand effect on hover */
     button:hover {
-      transform: scale(1.1); /* Slightly increase the button size */
+      transform: scale(1.1);
       background-color: #45a049;
     }
 
@@ -96,7 +95,7 @@
       font-size: 24px;
     }
 
-    /* Tier Animations */
+    /* Animations */
     @keyframes fadeIn {
       0% {
         opacity: 0;
@@ -106,78 +105,6 @@
       }
     }
 
-    @keyframes countUp {
-      0% {
-        transform: scale(1);
-        opacity: 0.6;
-      }
-      100% {
-        transform: scale(1.2);
-        opacity: 1;
-      }
-    }
-
-    /* Custom button styles for different tiers */
-    .tier-1 {
-      background-color: #4CAF50; /* Green */
-    }
-    .tier-2 {
-      background-color: #ff9800; /* Orange */
-    }
-    .tier-3 {
-      background-color: #f44336; /* Red */
-    }
-    .tier-4 {
-      background-color: #9c27b0; /* Purple */
-    }
-    .tier-5 {
-      background-color: #2196f3; /* Blue */
-    }
-
-    /* Intro Screen Styling */
-    .intro-container {
-      text-align: center;
-      background-color: rgba(255, 255, 255, 0.9);
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
-      width: 400px;
-    }
-
-    #startButton {
-      background-color: #4CAF50;
-      padding: 15px;
-      color: white;
-      font-size: 20px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      margin-top: 20px;
-    }
-
-    #startButton:hover {
-      background-color: #45a049;
-    }
-
-    /* Rebirth Button */
-    #rebirthButton {
-      background-color: #9c27b0; /* Purple */
-      padding: 15px;
-      font-size: 20px;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      margin-top: 20px;
-      opacity: 1;
-      animation: rebirthAnimation 1s ease-out forwards;
-    }
-
-    #rebirthButton:hover {
-      background-color: #8e24aa;
-    }
-
-    /* Rebirth Animation */
     @keyframes rebirthAnimation {
       0% {
         transform: scale(0);
@@ -216,7 +143,9 @@
     <h2>Tier Information</h2>
     <p>Current Tier: <span id="tierLevel">1</span></p>
 
-    <button id="rebirthButton">Rebirth</button>
+    <!-- Buy Tier and Rebirth Buttons -->
+    <button id="buyTierButton">Buy Tier (Cost: 500 points)</button>
+    <button id="rebirthButton">Rebirth (Cost: 1000 points)</button>
   </div>
 
   <script>
@@ -224,8 +153,8 @@
     let points = parseInt(localStorage.getItem('points')) || 0;
     let tier = parseInt(localStorage.getItem('tier')) || 1;
     let pointsPerClick = parseInt(localStorage.getItem('pointsPerClick')) || 1;
-    let rebirthCycle = ['#9c27b0', '#f44336', '#4CAF50', '#2196f3', '#ff9800']; // Color cycle for rebirth button
-    let rebirthIndex = 0;
+    let rebirthCost = tier * 1000; // Cost for rebirth increases with tier
+    let tierUpgradeCost = 500; // Flat cost to buy a new tier
 
     // DOM Elements
     const pointsDisplay = document.getElementById('points');
@@ -235,14 +164,18 @@
     const betAmountInput = document.getElementById('betAmount');
     const gambleResult = document.getElementById('gambleResult');
     const rebirthButton = document.getElementById('rebirthButton');
+    const buyTierButton = document.getElementById('buyTierButton');
     const startButton = document.getElementById('startButton');
     const gameContainer = document.getElementById('gameContainer');
     const introScreen = document.getElementById('introScreen');
 
-    // Update the points and tier information on the screen
+    // Update the points, tier, and button labels on the screen
     function updatePoints() {
       pointsDisplay.textContent = points;
       tierDisplay.textContent = tier;
+      rebirthCost = tier * 1000;
+      rebirthButton.textContent = `Rebirth (Cost: ${rebirthCost} points)`;
+      buyTierButton.textContent = `Buy Tier (Cost: ${tierUpgradeCost} points)`;
       localStorage.setItem('points', points);
       localStorage.setItem('tier', tier);
       localStorage.setItem('pointsPerClick', pointsPerClick);
@@ -285,24 +218,25 @@
       updatePoints();
     });
 
+    // Buy Tier function
+    buyTierButton.addEventListener('click', () => {
+      if (points >= tierUpgradeCost) {
+        points -= tierUpgradeCost;
+        tier++;
+        pointsPerClick = tier; // Increase points per click with each tier
+        updatePoints();
+      } else {
+        alert("You don't have enough points to buy a new tier!");
+      }
+    });
+
     // Rebirth function
     rebirthButton.addEventListener('click', () => {
-      const rebirthCost = tier * 1000; // Cost to rebirth (increases with tier)
       if (points >= rebirthCost) {
         points -= rebirthCost;
         tier++;
-        pointsPerClick = tier; // Points per click doubles with each rebirth
+        pointsPerClick = tier;
         updatePoints();
-
-        // Cycle through button colors
-        rebirthButton.style.backgroundColor = rebirthCycle[rebirthIndex];
-        rebirthIndex = (rebirthIndex + 1) % rebirthCycle.length;
-
-        // Optional: Add an animation or sound effect to signify the rebirth
-        rebirthButton.classList.add('rebirthAnimation');
-        setTimeout(() => {
-          rebirthButton.classList.remove('rebirthAnimation');
-        }, 1000);
       } else {
         alert("You don't have enough points for rebirth!");
       }
@@ -310,4 +244,3 @@
   </script>
 </body>
 </html>
-s
