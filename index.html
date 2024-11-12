@@ -8,22 +8,23 @@
     /* Rotating, color-changing background */
     @keyframes rotateGradient {
       0% {
-        background: linear-gradient(45deg, #ff6a00, #f44336);
+        background-position: 0% 50%;
       }
       25% {
-        background: linear-gradient(135deg, #ff6a00, #4CAF50);
+        background-position: 50% 100%;
       }
       50% {
-        background: linear-gradient(225deg, #2196f3, #ff9800);
+        background-position: 100% 50%;
       }
       75% {
-        background: linear-gradient(315deg, #673ab7, #e91e63);
+        background-position: 50% 0%;
       }
       100% {
-        background: linear-gradient(405deg, #ff6a00, #f44336);
+        background-position: 0% 50%;
       }
     }
 
+    /* Slow down and expand background */
     body {
       font-family: Arial, sans-serif;
       margin: 0;
@@ -32,8 +33,9 @@
       justify-content: center;
       align-items: center;
       height: 100vh;
-      animation: rotateGradient 15s linear infinite;
-      background-size: 200% 200%;
+      background: linear-gradient(45deg, #ff6a00, #f44336, #4CAF50, #2196f3);
+      background-size: 400% 400%;
+      animation: rotateGradient 60s linear infinite; /* Slow animation */
     }
 
     /* Styling for game container */
