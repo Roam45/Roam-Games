@@ -64,6 +64,12 @@
     <button id="buyAutoClickerButton">Buy Auto Clicker (Cost: 200 points)</button>
     <p>Offline Earnings: <span id="offlineEarnings">0</span> points per minute</p>
     <button id="buyOfflineEarningsButton">Upgrade Offline Earnings (Cost: <span id="offlineEarningsCost">500</span> points)</button>
+
+    <h2>Gambling</h2>
+    <p>Bet your points for a chance to double them!</p>
+    <input type="number" id="betAmount" placeholder="Enter bet amount" min="1">
+    <button id="gambleButton">Gamble</button>
+    <p id="gambleResult"></p>
   </div>
 
   <script>
@@ -86,6 +92,10 @@
     const startButton = document.getElementById('startButton');
     const gameContainer = document.getElementById('gameContainer');
     const introScreen = document.getElementById('introScreen');
+
+    const gambleButton = document.getElementById('gambleButton');
+    const betAmountInput = document.getElementById('betAmount');
+    const gambleResult = document.getElementById('gambleResult');
 
     let autoClickerInterval;
     let offlineEarningsInterval;
@@ -184,6 +194,26 @@
     function stopAutoClickers() {
       clearInterval(autoClickerInterval);
     }
+
+    gambleButton.addEventListener('click', () => {
+      const betAmount = parseInt(betAmountInput.value);
+      if (isNaN(betAmount) || betAmount <= 0 || betAmount > points) {
+        gambleResult.textContent = "Invalid bet amount!";
+        gambleResult.style.color = "red";
+        return;
+      }
+      points -= betAmount;
+      const win = Math.random() < 0.5;
+      if (win) {
+        points += betAmount * 2;
+        gambleResult.textContent = `You won! You now have ${betAmount * 2} points!`;
+        gambleResult.style.color = "green";
+      } else {
+        gambleResult.textContent = `You lost ${betAmount} points.`;
+        gambleResult.style.color = "red";
+      }
+      updateUI();
+    });
 
     updateUI();
   </script>
