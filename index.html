@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Button Clicking Simulator & Gambling</title>
   <style>
-    /* Gradient background for the whole page */
+    /* Basic styling */
     body {
       font-family: Arial, sans-serif;
       margin: 0;
@@ -14,10 +14,9 @@
       justify-content: center;
       align-items: center;
       height: 100vh;
-      background: linear-gradient(45deg, #ff6a00, #f44336); /* Gradient from orange to red */
+      background: linear-gradient(45deg, #ff6a00, #f44336);
       transition: background-color 0.5s ease;
     }
-
     .container {
       text-align: center;
       background-color: #fff;
@@ -27,13 +26,9 @@
       width: 400px;
       transition: transform 0.3s ease;
     }
-
-    h1 {
+    h1, h2 {
       color: #333;
-      font-size: 2em;
-      animation: fadeIn 1s ease-out;
     }
-
     button {
       padding: 10px 20px;
       font-size: 16px;
@@ -42,185 +37,141 @@
       border: none;
       border-radius: 5px;
       cursor: pointer;
-      transition: transform 0.2s ease, background-color 0.3s;
       margin-top: 15px;
     }
-
     button:hover {
-      transform: scale(1.1);
       background-color: #45a049;
     }
-
-    input {
-      padding: 10px;
-      font-size: 16px;
-      margin-top: 10px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-      width: 80%;
-    }
-
-    p {
-      font-size: 18px;
-      margin-top: 10px;
-    }
-
-    h2 {
-      margin-top: 30px;
-      color: #333;
-    }
-
     #gambleResult {
       font-weight: bold;
       margin-top: 10px;
-      opacity: 0;
-      animation: fadeIn 1s ease-out forwards;
     }
-
     #points {
-      display: inline-block;
       font-size: 24px;
       font-weight: bold;
-      transition: transform 0.5s ease-in-out;
     }
   </style>
 </head>
 <body>
-  <!-- Intro Screen -->
-  <div id="introScreen" class="intro-container">
+  <div id="introScreen" class="container">
     <h1>Welcome to Button Clicking Simulator!</h1>
-    <p>This is a simple game where you click the button to earn points and gamble them to try your luck.</p>
     <button id="startButton">Start Game</button>
   </div>
 
-  <!-- Main Game Container (Hidden initially) -->
   <div id="gameContainer" class="container" style="display: none;">
-    <h1>Button Clicking Simulator & Gambling</h1>
+    <h1>Button Clicking Simulator</h1>
     <p>Current Points: <span id="points">0</span></p>
-
-    <!-- Button Click -->
     <button id="clickButton">Click to Earn Points</button>
-
-    <h2>Gambling Game</h2>
-    <p>Bet your points and try your luck!</p>
-    <input type="number" id="betAmount" placeholder="Enter bet amount" min="1">
-    <button id="gambleButton">Gamble</button>
-    <p id="gambleResult"></p>
 
     <h2>Upgrades</h2>
     <p>Current Multiplier: <span id="multiplier">1</span></p>
-    <button id="buyMultiplierButton">Buy Multiplier (Cost: 50 points)</button>
+    <button id="buyMultiplierButton">Buy Multiplier (Cost: <span id="multiplierCost">50</span> points)</button>
+    <p>Auto Clickers: <span id="autoClickerCount">0</span></p>
     <button id="buyAutoClickerButton">Buy Auto Clicker (Cost: 200 points)</button>
+    <p>Offline Earnings: <span id="offlineEarnings">0</span> points per minute</p>
+    <button id="buyOfflineEarningsButton">Upgrade Offline Earnings (Cost: <span id="offlineEarningsCost">500</span> points)</button>
   </div>
 
   <script>
-    // Initialize variables
     let points = parseInt(localStorage.getItem('points')) || 0;
     let multiplier = parseInt(localStorage.getItem('multiplier')) || 1;
-    let autoClickerActive = localStorage.getItem('autoClickerActive') === 'true';
-    let pointsPerClick = multiplier;
+    let autoClickerCount = parseInt(localStorage.getItem('autoClickerCount')) || 0;
+    let offlineEarnings = parseInt(localStorage.getItem('offlineEarnings')) || 0;
+    let offlineEarningsCost = parseInt(localStorage.getItem('offlineEarningsCost')) || 500;
 
-    // DOM Elements
     const pointsDisplay = document.getElementById('points');
     const clickButton = document.getElementById('clickButton');
-    const gambleButton = document.getElementById('gambleButton');
-    const betAmountInput = document.getElementById('betAmount');
-    const gambleResult = document.getElementById('gambleResult');
     const buyMultiplierButton = document.getElementById('buyMultiplierButton');
     const buyAutoClickerButton = document.getElementById('buyAutoClickerButton');
+    const buyOfflineEarningsButton = document.getElementById('buyOfflineEarningsButton');
     const multiplierDisplay = document.getElementById('multiplier');
+    const multiplierCostDisplay = document.getElementById('multiplierCost');
+    const autoClickerCountDisplay = document.getElementById('autoClickerCount');
+    const offlineEarningsDisplay = document.getElementById('offlineEarnings');
+    const offlineEarningsCostDisplay = document.getElementById('offlineEarningsCost');
     const startButton = document.getElementById('startButton');
     const gameContainer = document.getElementById('gameContainer');
     const introScreen = document.getElementById('introScreen');
 
-    // Update the points and multiplier information on the screen
-    function updatePoints() {
+    function updateUI() {
       pointsDisplay.textContent = points;
       multiplierDisplay.textContent = multiplier;
+      autoClickerCountDisplay.textContent = autoClickerCount;
+      offlineEarningsDisplay.textContent = offlineEarnings;
+      offlineEarningsCostDisplay.textContent = offlineEarningsCost;
+      multiplierCostDisplay.textContent = multiplier * 50;
       localStorage.setItem('points', points);
       localStorage.setItem('multiplier', multiplier);
-      localStorage.setItem('autoClickerActive', autoClickerActive);
+      localStorage.setItem('autoClickerCount', autoClickerCount);
+      localStorage.setItem('offlineEarnings', offlineEarnings);
+      localStorage.setItem('offlineEarningsCost', offlineEarningsCost);
     }
 
-    // Start the game
     startButton.addEventListener('click', () => {
       introScreen.style.display = 'none';
       gameContainer.style.display = 'block';
-      updatePoints();
-
-      // Start auto-clicker if it's active
-      if (autoClickerActive) {
-        startAutoClicker();
-      }
+      updateUI();
+      startOfflineEarnings();
+      startAutoClickers();
     });
 
-    // Button click event to earn points
     clickButton.addEventListener('click', () => {
-      points += pointsPerClick;
-      updatePoints();
+      points += multiplier;
+      updateUI();
     });
 
-    // Gamble function
-    gambleButton.addEventListener('click', () => {
-      const betAmount = parseInt(betAmountInput.value);
-      if (isNaN(betAmount) || betAmount <= 0 || betAmount > points) {
-        gambleResult.textContent = "Invalid bet amount!";
-        gambleResult.style.color = "red";
-        return;
-      }
-      points -= betAmount;
-      updatePoints();
-
-      // Random win/lose (50% chance)
-      const win = Math.random() < 0.5;
-      if (win) {
-        points += betAmount * 2;
-        gambleResult.textContent = `You won! You now have ${betAmount * 2} points!`;
-        gambleResult.style.color = "green";
-      } else {
-        gambleResult.textContent = `You lost ${betAmount} points.`;
-        gambleResult.style.color = "red";
-      }
-      updatePoints();
-    });
-
-    // Buy multiplier function
     buyMultiplierButton.addEventListener('click', () => {
-      const multiplierCost = 50;
+      const multiplierCost = multiplier * 50;
       if (points >= multiplierCost) {
         points -= multiplierCost;
         multiplier++;
-        pointsPerClick = multiplier; // Update points per click based on multiplier
-        updatePoints();
+        updateUI();
       } else {
-        alert("You don't have enough points to buy a multiplier!");
+        alert("Not enough points to buy multiplier!");
       }
     });
 
-    // Buy auto-clicker function
     buyAutoClickerButton.addEventListener('click', () => {
       const autoClickerCost = 200;
-      if (!autoClickerActive && points >= autoClickerCost) {
+      if (points >= autoClickerCost) {
         points -= autoClickerCost;
-        autoClickerActive = true;
-        updatePoints();
-        startAutoClicker();
-      } else if (autoClickerActive) {
-        alert("Auto Clicker is already active!");
+        autoClickerCount++;
+        updateUI();
+        startAutoClickers();
       } else {
-        alert("You don't have enough points to buy the auto-clicker!");
+        alert("Not enough points to buy auto clicker!");
       }
     });
 
-    // Auto-clicker function (clicks every 2 seconds)
-    function startAutoClicker() {
-      setInterval(() => {
-        if (autoClickerActive) {
-          points += pointsPerClick;
-          updatePoints();
-        }
-      }, 2000); // 2 seconds
+    buyOfflineEarningsButton.addEventListener('click', () => {
+      if (points >= offlineEarningsCost) {
+        points -= offlineEarningsCost;
+        offlineEarnings++;
+        offlineEarningsCost += 500;
+        updateUI();
+      } else {
+        alert("Not enough points to upgrade offline earnings!");
+      }
+    });
+
+    function startAutoClickers() {
+      clearInterval(autoClickerInterval);
+      if (autoClickerCount > 0) {
+        autoClickerInterval = setInterval(() => {
+          points += multiplier * autoClickerCount;
+          updateUI();
+        }, 2000);
+      }
     }
+
+    function startOfflineEarnings() {
+      setInterval(() => {
+        points += offlineEarnings;
+        updateUI();
+      }, 60000); // Adds offline earnings every 1 minute
+    }
+
+    updateUI();
   </script>
 </body>
 </html>
