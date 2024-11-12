@@ -5,16 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Button Clicking Simulator & Gambling</title>
   <style>
-    /* Apply a linear gradient background */
     body {
       font-family: Arial, sans-serif;
-      background: linear-gradient(to right, #4facfe, #00f2fe); /* Gradient from blue to cyan */
       margin: 0;
       padding: 0;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
+      transition: background-color 0.5s ease;
+      background-color: #4caf50;
     }
 
     .container {
@@ -24,11 +24,13 @@
       border-radius: 10px;
       box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
       width: 400px;
+      transition: transform 0.3s ease;
     }
 
     h1 {
       color: #333;
       font-size: 2em;
+      animation: fadeIn 1s ease-out;
     }
 
     button {
@@ -41,6 +43,7 @@
       cursor: pointer;
       transition: background-color 0.3s;
       margin-top: 15px;
+      animation: bounce 0.5s ease infinite alternate;
     }
 
     button:hover {
@@ -69,7 +72,73 @@
     #gambleResult {
       font-weight: bold;
       margin-top: 10px;
+      opacity: 0;
+      animation: fadeIn 1s ease-out forwards;
     }
+
+    #points {
+      display: inline-block;
+      font-size: 24px;
+      font-weight: bold;
+      transition: transform 0.5s ease-in-out;
+    }
+
+    #tierInfo {
+      font-size: 18px;
+      margin-top: 20px;
+      font-weight: bold;
+    }
+
+    /* Tier Animations */
+    @keyframes fadeIn {
+      0% {
+        opacity: 0;
+      }
+      100% {
+        opacity: 1;
+      }
+    }
+
+    @keyframes bounce {
+      0% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-10px);
+      }
+      100% {
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes countUp {
+      0% {
+        transform: scale(1);
+        opacity: 0.6;
+      }
+      100% {
+        transform: scale(1.2);
+        opacity: 1;
+      }
+    }
+
+    /* Tier Background Colors */
+    .tier-1 {
+      background-color: #4caf50;
+    }
+    .tier-2 {
+      background-color: #ff9800;
+    }
+    .tier-3 {
+      background-color: #f44336;
+    }
+    .tier-4 {
+      background-color: #9c27b0;
+    }
+    .tier-5 {
+      background-color: #2196f3;
+    }
+    /* (Add additional colors for higher tiers if desired) */
   </style>
 </head>
 <body>
@@ -85,11 +154,17 @@
     <input type="number" id="betAmount" placeholder="Enter bet amount" min="1">
     <button id="gambleButton">Gamble</button>
     <p id="gambleResult"></p>
+
+    <h2>Buy Tier</h2>
+    <p>Tier: <span id="tierLevel">1</span> (0 Points)</p>
+    <p id="tierInfo">Upgrade to Tier 2 for 10 points!</p>
+    <button id="buyTierButton">Buy Next Tier</button>
   </div>
 
   <script>
-    // Initial points
+    // Initial points and tier
     let points = 0;
+    let tier = 1;
 
     // DOM Elements
     const pointsDisplay = document.getElementById("points");
@@ -97,32 +172,92 @@
     const betAmountInput = document.getElementById("betAmount");
     const gambleButton = document.getElementById("gambleButton");
     const gambleResult = document.getElementById("gambleResult");
+    const tierLevel = document.getElementById("tierLevel");
+    const tierInfo = document.getElementById("tierInfo");
+    const buyTierButton = document.getElementById("buyTierButton");
+    const body = document.body;
+    const container = document.querySelector(".container");
 
     // Function to update the points display
     function updatePoints() {
       pointsDisplay.textContent = points;
+      pointsDisplay.style.animation = 'none'; // Reset animation
+      pointsDisplay.offsetHeight; // Trigger reflow to restart animation
+      pointsDisplay.style.animation = 'countUp 0.5s ease-out forwards';
+
+      // Update tier and tier information
+      updateTier();
     }
 
-    // Function to handle button click to earn points
+    // Function to update the tier based on points
+    function updateTier() {
+      if (tier > 100) {
+        // Max tier is 100
+        tier = 100;
+        tierLevel.textContent = `100 (Max Tier)`;
+        tierInfo.textContent = "You are at the maximum tier!";
+        body.style.backgroundColor = "#9c27b0"; // Purple color for max tier
+        buyTierButton.disabled = true;
+        return;
+      }
+
+      // Calculate the cost to move to the next tier (increasing cost)
+      const tierCost = tier * 10; // e.g., Tier 1 to 2 costs 10 points, Tier 2 to 3 costs 20 points, etc.
+      if (points >= tierCost) {
+        tierInfo.textContent = `Upgrade to Tier ${tier + 1} for ${tierCost} points!`;
+        buyTierButton.disabled = false;
+      } else {
+        tierInfo.textContent = `You need ${tierCost - points} more points to upgrade!`;
+        buyTierButton.disabled = true;
+      }
+
+      // Update tier color and background
+      switch (tier) {
+        case 1:
+          container.className = 'container tier-1';
+          break;
+        case 2:
+          container.className = 'container tier-2';
+          break;
+        case 3:
+          container.className = 'container tier-3';
+          break;
+        case 4:
+          container.className = 'container tier-4';
+          break;
+        case 5:
+          container.className = 'container tier-5';
+          break;
+        default:
+          container.className = 'container';
+          break;
+      }
+
+      // Update tier display
+      tierLevel.textContent = tier;
+    }
+
+    // Handle click to earn points
     clickButton.addEventListener("click", () => {
       points += 1;  // Earn 1 point per click
       updatePoints();
     });
 
-    // Function to handle gambling
+    // Handle gambling
     gambleButton.addEventListener("click", () => {
       const betAmount = parseInt(betAmountInput.value);
 
-      // Check if the bet is valid
       if (isNaN(betAmount) || betAmount <= 0) {
         gambleResult.textContent = "Please enter a valid bet amount!";
         gambleResult.style.color = "red";
+        gambleResult.style.animation = 'fadeIn 1s ease-out forwards';
         return;
       }
 
       if (betAmount > points) {
         gambleResult.textContent = "You don't have enough points to bet!";
         gambleResult.style.color = "red";
+        gambleResult.style.animation = 'fadeIn 1s ease-out forwards';
         return;
       }
 
@@ -130,21 +265,30 @@
       points -= betAmount;
       updatePoints();
 
-      // Simple coin flip gambling (50% win chance)
-      const win = Math.random() < 0.5;
+      // 30% win chance, 70% lose chance
+      const win = Math.random() < 0.3;
 
       if (win) {
-        // Win: Double the bet
         points += betAmount * 2;
         gambleResult.textContent = `You won! You now have ${betAmount * 2} points!`;
         gambleResult.style.color = "green";
       } else {
-        // Lose: No points back
         gambleResult.textContent = `You lost your bet of ${betAmount} points.`;
         gambleResult.style.color = "red";
       }
 
-      updatePoints();
+      gambleResult.style.animation = 'fadeIn 1s ease-out forwards';
+    });
+
+    // Handle buying next tier
+    buyTierButton.addEventListener("click", () => {
+      const tierCost = tier * 10; // Calculate the cost to upgrade to the next tier
+
+      if (points >= tierCost) {
+        points -= tierCost;
+        tier += 1; // Increase tier
+        updatePoints();
+      }
     });
   </script>
 </body>
