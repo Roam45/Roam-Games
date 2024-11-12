@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Button Clicking Simulator & Gambling</title>
+  <title>Button Clicking Simulator</title>
   <style>
     /* Basic styling */
     body {
@@ -15,7 +15,6 @@
       align-items: center;
       height: 100vh;
       background: linear-gradient(45deg, #ff6a00, #f44336);
-      transition: background-color 0.5s ease;
     }
     .container {
       text-align: center;
@@ -24,7 +23,6 @@
       border-radius: 10px;
       box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
       width: 400px;
-      transition: transform 0.3s ease;
     }
     h1, h2 {
       color: #333;
@@ -41,10 +39,6 @@
     }
     button:hover {
       background-color: #45a049;
-    }
-    #gambleResult {
-      font-weight: bold;
-      margin-top: 10px;
     }
     #points {
       font-size: 24px;
@@ -93,6 +87,9 @@
     const gameContainer = document.getElementById('gameContainer');
     const introScreen = document.getElementById('introScreen');
 
+    let autoClickerInterval;
+    let offlineEarningsInterval;
+
     function updateUI() {
       pointsDisplay.textContent = points;
       multiplierDisplay.textContent = multiplier;
@@ -111,7 +108,6 @@
       introScreen.style.display = 'none';
       gameContainer.style.display = 'block';
       updateUI();
-      startOfflineEarnings();
       startAutoClickers();
     });
 
@@ -165,10 +161,28 @@
     }
 
     function startOfflineEarnings() {
-      setInterval(() => {
+      offlineEarningsInterval = setInterval(() => {
         points += offlineEarnings;
         updateUI();
       }, 60000); // Adds offline earnings every 1 minute
+    }
+
+    function stopOfflineEarnings() {
+      clearInterval(offlineEarningsInterval);
+    }
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') {
+        stopAutoClickers();
+        startOfflineEarnings();
+      } else {
+        stopOfflineEarnings();
+        startAutoClickers();
+      }
+    });
+
+    function stopAutoClickers() {
+      clearInterval(autoClickerInterval);
     }
 
     updateUI();
