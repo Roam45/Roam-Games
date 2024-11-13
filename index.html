@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Button Clicking Simulator</title>
   <style>
-    /* Rotating, color-changing background */
     @keyframes rotateGradient {
       0% {
         background-position: 0% 50%;
@@ -24,7 +23,6 @@
       }
     }
 
-    /* Slow down and expand background */
     body {
       font-family: Arial, sans-serif;
       margin: 0;
@@ -35,10 +33,9 @@
       height: 100vh;
       background: linear-gradient(45deg, #ff6a00, #f44336, #4CAF50, #2196f3);
       background-size: 400% 400%;
-      animation: rotateGradient 60s linear infinite; /* Slow animation */
+      animation: rotateGradient 60s linear infinite;
     }
 
-    /* Styling for game container */
     .container {
       text-align: center;
       background-color: rgba(255, 255, 255, 0.9);
@@ -72,7 +69,6 @@
       font-weight: bold;
     }
 
-    /* Style for input fields */
     input[type="number"] {
       padding: 10px;
       font-size: 16px;
@@ -82,7 +78,6 @@
       margin-right: 10px;
     }
 
-    /* Flex container for gamble input and button */
     .gamble-container {
       display: flex;
       justify-content: center;
@@ -125,14 +120,12 @@
   </div>
 
   <script>
-    // Game variables
-    let points = 0;
-    let multiplier = 1;
-    let autoClickerCount = 0;
-    let offlineEarnings = 0;
-    let offlineEarningsCost = 500;
+    let points = parseInt(localStorage.getItem('points')) || 0;
+    let multiplier = parseInt(localStorage.getItem('multiplier')) || 1;
+    let autoClickerCount = parseInt(localStorage.getItem('autoClickerCount')) || 0;
+    let offlineEarnings = parseInt(localStorage.getItem('offlineEarnings')) || 0;
+    let offlineEarningsCost = parseInt(localStorage.getItem('offlineEarningsCost')) || 500;
 
-    // Update UI elements
     const pointsDisplay = document.getElementById('points');
     const startButton = document.getElementById('startButton');
     const gameContainer = document.getElementById('gameContainer');
@@ -146,9 +139,18 @@
     const betAmountInput = document.getElementById('betAmount');
     const gambleResult = document.getElementById('gambleResult');
 
+    function saveGameState() {
+      localStorage.setItem('points', points);
+      localStorage.setItem('multiplier', multiplier);
+      localStorage.setItem('autoClickerCount', autoClickerCount);
+      localStorage.setItem('offlineEarnings', offlineEarnings);
+      localStorage.setItem('offlineEarningsCost', offlineEarningsCost);
+    }
+
     function updateUI() {
       pointsDisplay.textContent = points;
       multiplierCostDisplay.textContent = multiplier * 50;
+      saveGameState();
     }
 
     startButton.addEventListener('click', () => {
