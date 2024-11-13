@@ -5,24 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Button Clicking Simulator</title>
   <style>
-    @keyframes rotateGradient {
-      0% {
-        background-position: 0% 50%;
-      }
-      25% {
-        background-position: 50% 100%;
-      }
-      50% {
-        background-position: 100% 50%;
-      }
-      75% {
-        background-position: 50% 0%;
-      }
-      100% {
-        background-position: 0% 50%;
-      }
-    }
-
+    /* Gradient background */
     body {
       font-family: Arial, sans-serif;
       margin: 0;
@@ -31,24 +14,25 @@
       justify-content: center;
       align-items: center;
       height: 100vh;
-      background: linear-gradient(45deg, #ff6a00, #f44336, #4CAF50, #2196f3);
-      background-size: 400% 400%;
-      animation: rotateGradient 60s linear infinite;
+      background: linear-gradient(45deg, #ff6a00, #f44336, #2196f3, #4CAF50);
+      animation: gradientRotate 30s linear infinite;
+    }
+    @keyframes gradientRotate {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
     }
 
     .container {
       text-align: center;
-      background-color: rgba(255, 255, 255, 0.9);
+      background-color: #fff;
       padding: 20px;
       border-radius: 10px;
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
       width: 400px;
     }
 
-    h1, h2 {
-      color: #333;
-    }
-    
+    h1 { color: #333; font-size: 2em; }
     button {
       padding: 10px 20px;
       font-size: 16px;
@@ -57,36 +41,24 @@
       border: none;
       border-radius: 5px;
       cursor: pointer;
+      transition: transform 0.2s ease, background-color 0.3s;
       margin-top: 15px;
     }
-
-    button:hover {
-      background-color: #45a049;
-    }
-
-    #points {
-      font-size: 24px;
-      font-weight: bold;
-    }
-
-    input[type="number"] {
+    button:hover { transform: scale(1.1); background-color: #45a049; }
+    input {
       padding: 10px;
       font-size: 16px;
       border-radius: 5px;
       border: 1px solid #ccc;
-      width: 100px;
-      margin-right: 10px;
+      width: 80px;
+      text-align: center;
     }
-
-    .gamble-container {
+    p { font-size: 18px; margin-top: 10px; }
+    .horizontal-container {
       display: flex;
-      justify-content: center;
       align-items: center;
-      margin-top: 15px;
-    }
-
-    #gambleResult {
-      font-weight: bold;
+      justify-content: center;
+      gap: 10px;
       margin-top: 10px;
     }
   </style>
@@ -94,25 +66,20 @@
 <body>
   <div id="introScreen" class="container">
     <h1>Welcome to Button Clicking Simulator!</h1>
+    <p>Click the button to earn points. You can buy upgrades to increase your points per click or gamble your points.</p>
     <button id="startButton">Start Game</button>
   </div>
 
   <div id="gameContainer" class="container" style="display: none;">
     <h1>Button Clicking Simulator</h1>
     <p>Current Points: <span id="points">0</span></p>
+    
     <button id="clickButton">Click to Earn Points</button>
-
     <h2>Upgrades</h2>
-    <p>Current Multiplier: <span id="multiplier">1</span></p>
-    <button id="buyMultiplierButton">Buy Multiplier (Cost: <span id="multiplierCost">50</span> points)</button>
-    <p>Auto Clickers: <span id="autoClickerCount">0</span></p>
-    <button id="buyAutoClickerButton">Buy Auto Clicker (Cost: 200 points)</button>
-    <p>Offline Earnings: <span id="offlineEarnings">0</span> points per minute</p>
-    <button id="buyOfflineEarningsButton">Upgrade Offline Earnings (Cost: <span id="offlineEarningsCost">500</span> points)</button>
-
+    <button id="buyMultiplierButton">Buy Multiplier (Cost: <span id="multiplierCost">50</span>)</button>
+    <button id="buyAutoClickerButton">Buy Auto Clicker (Cost: 200)</button>
     <h2>Gambling</h2>
-    <p>Bet your points for a chance to double them!</p>
-    <div class="gamble-container">
+    <div class="horizontal-container">
       <input type="number" id="betAmount" placeholder="Enter bet amount" min="1">
       <button id="gambleButton">Gamble</button>
     </div>
@@ -123,8 +90,6 @@
     let points = parseInt(localStorage.getItem('points')) || 0;
     let multiplier = parseInt(localStorage.getItem('multiplier')) || 1;
     let autoClickerCount = parseInt(localStorage.getItem('autoClickerCount')) || 0;
-    let offlineEarnings = parseInt(localStorage.getItem('offlineEarnings')) || 0;
-    let offlineEarningsCost = parseInt(localStorage.getItem('offlineEarningsCost')) || 500;
 
     const pointsDisplay = document.getElementById('points');
     const startButton = document.getElementById('startButton');
@@ -133,7 +98,6 @@
     const clickButton = document.getElementById('clickButton');
     const buyMultiplierButton = document.getElementById('buyMultiplierButton');
     const buyAutoClickerButton = document.getElementById('buyAutoClickerButton');
-    const buyOfflineEarningsButton = document.getElementById('buyOfflineEarningsButton');
     const multiplierCostDisplay = document.getElementById('multiplierCost');
     const gambleButton = document.getElementById('gambleButton');
     const betAmountInput = document.getElementById('betAmount');
@@ -143,8 +107,6 @@
       localStorage.setItem('points', points);
       localStorage.setItem('multiplier', multiplier);
       localStorage.setItem('autoClickerCount', autoClickerCount);
-      localStorage.setItem('offlineEarnings', offlineEarnings);
-      localStorage.setItem('offlineEarningsCost', offlineEarningsCost);
     }
 
     function updateUI() {
@@ -184,19 +146,9 @@
           points += multiplier;
           updateUI();
         }, 2000);
-      } else {
-        alert("Not enough points to buy auto clicker!");
-      }
-    });
-
-    buyOfflineEarningsButton.addEventListener('click', () => {
-      if (points >= offlineEarningsCost) {
-        points -= offlineEarningsCost;
-        offlineEarnings++;
-        offlineEarningsCost += 500;
         updateUI();
       } else {
-        alert("Not enough points to upgrade offline earnings!");
+        alert("Not enough points to buy auto clicker!");
       }
     });
 
