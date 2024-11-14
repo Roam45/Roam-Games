@@ -86,7 +86,7 @@
     <button id="clickButton">Click to Earn Points</button>
 
     <h2>Shop</h2>
-    <button id="buyMultiplier">Buy Multiplier (50x current points)</button>
+    <button id="buyMultiplier">Buy Multiplier (Cost: <span id="multiplierCost">50</span> points)</button>
     <button id="buyAutoClicker">Buy Auto-Clicker (100 points)</button>
 
     <h2>Gambling</h2>
@@ -106,6 +106,7 @@
     let multiplierLevel = parseInt(localStorage.getItem('multiplierLevel')) || 1;
     let autoClickerCount = parseInt(localStorage.getItem('autoClickerCount')) || 0;
     let pointsPerClick = multiplierLevel;
+    let multiplierCost = 50; // Initial cost for multiplier purchase
 
     // DOM Elements
     const startButton = document.getElementById('startButton');
@@ -120,12 +121,14 @@
     const buyAutoClickerButton = document.getElementById('buyAutoClicker');
     const multiplierLevelDisplay = document.getElementById('multiplierLevel');
     const autoClickerCountDisplay = document.getElementById('autoClickerCount');
+    const multiplierCostDisplay = document.getElementById('multiplierCost');
 
     // Update display for points and items
     function updateDisplay() {
       pointsDisplay.textContent = points;
       multiplierLevelDisplay.textContent = multiplierLevel;
       autoClickerCountDisplay.textContent = autoClickerCount;
+      multiplierCostDisplay.textContent = multiplierCost;
       localStorage.setItem('points', points);
       localStorage.setItem('multiplierLevel', multiplierLevel);
       localStorage.setItem('autoClickerCount', autoClickerCount);
@@ -146,11 +149,11 @@
 
     // Buy Multiplier
     buyMultiplierButton.addEventListener('click', () => {
-      const multiplierCost = pointsPerClick * 50;
       if (points >= multiplierCost) {
         points -= multiplierCost;
         multiplierLevel++;
         pointsPerClick = multiplierLevel;
+        multiplierCost *= 2; // Each purchase doubles the cost
         updateDisplay();
       } else {
         alert("Not enough points to buy multiplier!");
