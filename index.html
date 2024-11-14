@@ -109,7 +109,7 @@
   </div>
 
   <script>
-    // Initialize game variables
+    // Initialize game variables from localStorage
     let points = parseInt(localStorage.getItem('points')) || 0;
     let multiplier = parseInt(localStorage.getItem('multiplier')) || 1;
     let pointsPerClick = parseInt(localStorage.getItem('pointsPerClick')) || 1;
@@ -185,10 +185,10 @@
       points -= betAmount;
       updateDisplay();
 
-      const win = Math.random() < 0.1;
+      const win = Math.random() < 0.5;
       if (win) {
         points += betAmount * 2;
-        gambleResult.textContent = `You won! You now have ${betAmount * 3} points!`;
+        gambleResult.textContent = `You won! You now have ${betAmount * 2} points!`;
         gambleResult.style.color = "green";
       } else {
         gambleResult.textContent = `You lost ${betAmount} points.`;
@@ -212,7 +212,8 @@
       }
     });
 
-    updateDisplay();  // Initialize display
+    // Initialize display
+    updateDisplay();
   </script>
 </body>
 </html>
