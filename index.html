@@ -17,7 +17,7 @@
       overflow: hidden;
       background: linear-gradient(45deg, #ff6a00, #f44336, #2196f3, #4CAF50, #ff6a00);
       background-size: 200% 200%;
-      animation: gradientRotate 30s linear infinite;
+      animation: gradientRotate 60s linear infinite;
     }
 
     @keyframes gradientRotate {
@@ -54,8 +54,21 @@
       background-color: #45a049;
     }
 
-    /* Hide the game container initially */
-    #gameContainer { display: none; }
+    /* Styling for bet input field */
+    #betAmount {
+      padding: 10px;
+      font-size: 16px;
+      margin-top: 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      width: 100px;
+      margin-right: 10px;
+    }
+
+    #gambleResult {
+      font-weight: bold;
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
@@ -67,15 +80,32 @@
   </div>
 
   <!-- Main Game Container (Hidden initially) -->
-  <div id="gameContainer" class="container">
+  <div id="gameContainer" class="container" style="display: none;">
     <h1>Button Clicking Simulator</h1>
     <p>Current Points: <span id="points">0</span></p>
     <button id="clickButton">Click to Earn Points</button>
+
+    <h2>Shop</h2>
+    <button id="buyMultiplier">Buy Multiplier (50x current points)</button>
+    <button id="buyAutoClicker">Buy Auto-Clicker (100 points)</button>
+
+    <h2>Gambling</h2>
+    <div style="display: flex; align-items: center; justify-content: center;">
+      <input type="number" id="betAmount" placeholder="Bet amount" min="1">
+      <button id="gambleButton">Gamble</button>
+    </div>
+    <p id="gambleResult"></p>
+
+    <p>Multiplier Level: <span id="multiplierLevel">1</span></p>
+    <p>Auto-Clickers: <span id="autoClickerCount">0</span></p>
   </div>
 
   <script>
-    // Initialize variables
-    let points = 0;
+    // Load saved data or set default values
+    let points = parseInt(localStorage.getItem('points')) || 0;
+    let multiplierLevel = parseInt(localStorage.getItem('multiplierLevel')) || 1;
+    let autoClickerCount = parseInt(localStorage.getItem('autoClickerCount')) || 0;
+    let pointsPerClick = multiplierLevel;
 
     // DOM Elements
     const startButton = document.getElementById('startButton');
@@ -83,23 +113,97 @@
     const introScreen = document.getElementById('introScreen');
     const pointsDisplay = document.getElementById('points');
     const clickButton = document.getElementById('clickButton');
+    const gambleButton = document.getElementById('gambleButton');
+    const betAmountInput = document.getElementById('betAmount');
+    const gambleResult = document.getElementById('gambleResult');
+    const buyMultiplierButton = document.getElementById('buyMultiplier');
+    const buyAutoClickerButton = document.getElementById('buyAutoClicker');
+    const multiplierLevelDisplay = document.getElementById('multiplierLevel');
+    const autoClickerCountDisplay = document.getElementById('autoClickerCount');
 
-    // Function to update points display
-    function updatePoints() {
+    // Update display for points and items
+    function updateDisplay() {
       pointsDisplay.textContent = points;
+      multiplierLevelDisplay.textContent = multiplierLevel;
+      autoClickerCountDisplay.textContent = autoClickerCount;
+      localStorage.setItem('points', points);
+      localStorage.setItem('multiplierLevel', multiplierLevel);
+      localStorage.setItem('autoClickerCount', autoClickerCount);
     }
 
     // Start Game Button
     startButton.addEventListener('click', () => {
       introScreen.style.display = 'none'; // Hide intro screen
       gameContainer.style.display = 'block'; // Show game container
+      updateDisplay();
     });
 
     // Click Button to earn points
     clickButton.addEventListener('click', () => {
-      points += 1;
-      updatePoints();
+      points += pointsPerClick;
+      updateDisplay();
     });
+
+    // Buy Multiplier
+    buyMultiplierButton.addEventListener('click', () => {
+      const multiplierCost = pointsPerClick * 50;
+      if (points >= multiplierCost) {
+        points -= multiplierCost;
+        multiplierLevel++;
+        pointsPerClick = multiplierLevel;
+        updateDisplay();
+      } else {
+        alert("Not enough points to buy multiplier!");
+      }
+    });
+
+    // Buy Auto-Clicker
+    buyAutoClickerButton.addEventListener('click', () => {
+      const autoClickerCost = 100;
+      if (points >= autoClickerCost) {
+        points -= autoClickerCost;
+        autoClickerCount++;
+        startAutoClickers();
+        updateDisplay();
+      } else {
+        alert("Not enough points to buy auto-clicker!");
+      }
+    });
+
+    // Gamble Points
+    gambleButton.addEventListener('click', () => {
+      const betAmount = parseInt(betAmountInput.value);
+      if (isNaN(betAmount) || betAmount <= 0 || betAmount > points) {
+        gambleResult.textContent = "Invalid bet amount!";
+        gambleResult.style.color = "red";
+        return;
+      }
+      points -= betAmount;
+      const win = Math.random() < 0.5;
+      if (win) {
+        points += betAmount * 2;
+        gambleResult.textContent = `You won! You now have ${points} points!`;
+        gambleResult.style.color = "green";
+      } else {
+        gambleResult.textContent = `You lost ${betAmount} points.`;
+        gambleResult.style.color = "red";
+      }
+      updateDisplay();
+    });
+
+    // Auto-Clicker function
+    function startAutoClickers() {
+      setInterval(() => {
+        points += pointsPerClick * autoClickerCount;
+        updateDisplay();
+      }, 2000); // Every 2 seconds
+    }
+
+    // Start existing auto-clickers on load
+    if (autoClickerCount > 0) startAutoClickers();
+
+    // Initial display update
+    updateDisplay();
   </script>
 </body>
 </html>
