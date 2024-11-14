@@ -19,7 +19,6 @@
       animation: gradientRotate 60s linear infinite;
     }
 
-    /* Keyframes to rotate the background */
     @keyframes gradientRotate {
       0% {
         background-position: 0% 50%;
@@ -217,23 +216,26 @@
       if (points >= rebirthCost) {
         points -= rebirthCost;
         rebirthLevel++;
-        pointsPerClick = (rebirthLevel + 1) * multiplierLevel;
+
+        // Double multiplier and reset points per click based on rebirth level
+        pointsPerClick = (rebirthLevel + 1) * multiplierLevel * 2; // Doubling the points per click
+        multiplierCost = 50 * Math.pow(2, rebirthLevel); // Double multiplier cost with each rebirth
+        multiplierLevel = 1; // Reset multiplier level
+        autoClickerCount = 0; // Reset auto-clickers
+
         updateDisplay();
       } else {
-        alert("Not enough points for rebirth!");
+        alert("Not enough points to rebirth!");
       }
     });
 
-    // Auto-Clicker function
+    // Start auto-clickers
     function startAutoClickers() {
       setInterval(() => {
-        points += pointsPerClick * autoClickerCount;
+        points += pointsPerClick;
         updateDisplay();
-      }, 2000);
+      }, 2000); // Auto-click every 2 seconds
     }
-
-    // Start existing auto-clickers on load
-    startAutoClickers();
   </script>
 </body>
 </html>
