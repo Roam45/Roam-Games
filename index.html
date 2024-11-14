@@ -5,33 +5,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Button Clicking Simulator</title>
   <style>
+    /* Basic styles for layout */
     body {
       font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
-      overflow: hidden;
       background: linear-gradient(45deg, #ff6a00, #f44336, #2196f3, #4CAF50, #ff6a00);
       background-size: 200% 200%;
       animation: gradientRotate 60s linear infinite;
+      overflow: hidden;
     }
 
     @keyframes gradientRotate {
-      0% {
-        background-position: 0% 50%;
-      }
-      50% {
-        background-position: 100% 50%;
-      }
-      100% {
-        background-position: 0% 50%;
-      }
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
     }
 
-    .container, .intro-container {
+    .container {
       text-align: center;
       background-color: #fff;
       padding: 20px;
@@ -40,180 +33,111 @@
       width: 400px;
     }
 
-    h1 {
-      color: #333;
-      font-size: 2em;
-    }
-
-    button {
-      padding: 10px 20px;
-      font-size: 16px;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: transform 0.2s ease, background-color 0.3s;
-      margin-top: 15px;
-    }
-
-    button:hover {
-      transform: scale(1.1);
-      background-color: #45a049;
-    }
-
-    #betAmount {
+    h1 { color: #333; font-size: 2em; }
+    button, input[type="number"] {
+      margin: 10px;
       padding: 10px;
       font-size: 16px;
-      margin-top: 10px;
       border-radius: 5px;
-      border: 1px solid #ccc;
-      width: 100px;
-      margin-right: 10px;
-    }
-
-    #gambleResult {
-      font-weight: bold;
-      margin-top: 10px;
     }
   </style>
 </head>
 <body>
-  <!-- Intro Screen -->
-  <div id="introScreen" class="intro-container">
-    <h1>Welcome to Button Clicking Simulator!</h1>
-    <p>Click "Start Game" to begin!</p>
-    <button id="startButton">Start Game</button>
-  </div>
 
-  <!-- Main Game Container (Hidden initially) -->
-  <div id="gameContainer" class="container" style="display: none;">
-    <h1>Button Clicking Simulator</h1>
-    <p>Current Points: <span id="points">0</span></p>
-    <button id="clickButton">Click to Earn Points</button>
+<div class="container">
+  <h1>Button Clicking Simulator</h1>
+  <p>Current Points: <span id="points">0</span></p>
+  <button id="clickButton">Click to Earn Points</button>
+  
+  <h2>Shop</h2>
+  <button id="buyMultiplier">Buy Multiplier (Cost: <span id="multiplierCost">50</span> points)</button>
+  <p>Multipliers Owned: <span id="multiplierCount">0</span></p>
+  
+  <button id="buyAutoClicker">Buy Auto-Clicker (100 points)</button>
+  <p>Auto-Clickers Owned: <span id="autoClickerCount">0</span></p>
 
-    <h2>Shop</h2>
-    <button id="buyMultiplier">Buy Multiplier (Cost: <span id="multiplierCost">50</span> points)</button>
-    <button id="buyAutoClicker">Buy Auto-Clicker (100 points)</button>
+  <h2>Rebirth</h2>
+  <p>Rebirth Cost: 10,000 points</p>
+  <button id="rebirthButton">Rebirth</button>
+</div>
 
-    <h2>Gambling</h2>
-    <div style="display: flex; align-items: center; justify-content: center;">
-      <input type="number" id="betAmount" placeholder="Bet amount" min="1">
-      <button id="gambleButton">Gamble</button>
-    </div>
-    <p id="gambleResult"></p>
+<script>
+  let points = parseInt(localStorage.getItem('points')) || 0;
+  let multiplierCount = parseInt(localStorage.getItem('multiplierCount')) || 0;
+  let autoClickerCount = parseInt(localStorage.getItem('autoClickerCount')) || 0;
+  let pointsPerClick = parseInt(localStorage.getItem('pointsPerClick')) || 1;
+  let multiplierCost = parseInt(localStorage.getItem('multiplierCost')) || 50;
+  let autoClickerCost = 100;
 
-    <h2>Rebirth</h2>
-    <p>Rebirth Cost: 10,000 points</p>
-    <button id="rebirthButton">Rebirth</button>
-  </div>
+  const pointsDisplay = document.getElementById('points');
+  const multiplierCountDisplay = document.getElementById('multiplierCount');
+  const autoClickerCountDisplay = document.getElementById('autoClickerCount');
+  const multiplierCostDisplay = document.getElementById('multiplierCost');
+  const clickButton = document.getElementById('clickButton');
+  const buyMultiplierButton = document.getElementById('buyMultiplier');
+  const buyAutoClickerButton = document.getElementById('buyAutoClicker');
+  const rebirthButton = document.getElementById('rebirthButton');
 
-  <script>
-    // Initialize game variables from localStorage
-    let points = parseInt(localStorage.getItem('points')) || 0;
-    let multiplier = parseInt(localStorage.getItem('multiplier')) || 1;
-    let pointsPerClick = parseInt(localStorage.getItem('pointsPerClick')) || 1;
-    let rebirths = parseInt(localStorage.getItem('rebirths')) || 0;
+  function updateDisplay() {
+    pointsDisplay.textContent = points;
+    multiplierCountDisplay.textContent = multiplierCount;
+    autoClickerCountDisplay.textContent = autoClickerCount;
+    multiplierCostDisplay.textContent = multiplierCost;
+    localStorage.setItem('points', points);
+    localStorage.setItem('multiplierCount', multiplierCount);
+    localStorage.setItem('autoClickerCount', autoClickerCount);
+    localStorage.setItem('pointsPerClick', pointsPerClick);
+    localStorage.setItem('multiplierCost', multiplierCost);
+  }
 
-    // DOM Elements
-    const pointsDisplay = document.getElementById('points');
-    const multiplierCostDisplay = document.getElementById('multiplierCost');
-    const clickButton = document.getElementById('clickButton');
-    const buyMultiplierButton = document.getElementById('buyMultiplier');
-    const buyAutoClickerButton = document.getElementById('buyAutoClicker');
-    const gambleButton = document.getElementById('gambleButton');
-    const betAmountInput = document.getElementById('betAmount');
-    const gambleResult = document.getElementById('gambleResult');
-    const rebirthButton = document.getElementById('rebirthButton');
-    const startButton = document.getElementById('startButton');
-    const gameContainer = document.getElementById('gameContainer');
-    const introScreen = document.getElementById('introScreen');
-
-    // Update points and multiplier display
-    function updateDisplay() {
-      pointsDisplay.textContent = points;
-      multiplierCostDisplay.textContent = 50 * Math.pow(2, rebirths);  // Double the multiplier cost after each rebirth
-      localStorage.setItem('points', points);
-      localStorage.setItem('multiplier', multiplier);
-      localStorage.setItem('pointsPerClick', pointsPerClick);
-      localStorage.setItem('rebirths', rebirths);
-    }
-
-    // Start game
-    startButton.addEventListener('click', () => {
-      introScreen.style.display = 'none';
-      gameContainer.style.display = 'block';
-      updateDisplay();
-    });
-
-    // Click to earn points
-    clickButton.addEventListener('click', () => {
-      points += pointsPerClick;
-      updateDisplay();
-    });
-
-    // Buy multiplier
-    buyMultiplierButton.addEventListener('click', () => {
-      const multiplierCost = 50 * Math.pow(2, rebirths);
-      if (points >= multiplierCost) {
-        points -= multiplierCost;
-        multiplier *= 2;
-        updateDisplay();
-      } else {
-        alert("Not enough points for multiplier!");
-      }
-    });
-
-    // Buy auto-clicker (not implemented in full, but could be expanded)
-    buyAutoClickerButton.addEventListener('click', () => {
-      if (points >= 100) {
-        points -= 100;
-        updateDisplay();
-      } else {
-        alert("Not enough points for auto-clicker!");
-      }
-    });
-
-    // Gamble functionality
-    gambleButton.addEventListener('click', () => {
-      const betAmount = parseInt(betAmountInput.value);
-      if (isNaN(betAmount) || betAmount <= 0 || betAmount > points) {
-        gambleResult.textContent = "Invalid bet amount!";
-        gambleResult.style.color = "red";
-        return;
-      }
-      points -= betAmount;
-      updateDisplay();
-
-      const win = Math.random() < 0.5;
-      if (win) {
-        points += betAmount * 2;
-        gambleResult.textContent = `You won! You now have ${betAmount * 2} points!`;
-        gambleResult.style.color = "green";
-      } else {
-        gambleResult.textContent = `You lost ${betAmount} points.`;
-        gambleResult.style.color = "red";
-      }
-      updateDisplay();
-    });
-
-    // Rebirth functionality
-    rebirthButton.addEventListener('click', () => {
-      const rebirthCost = 10000;
-      if (points >= rebirthCost) {
-        points -= rebirthCost;
-        rebirths++;
-        pointsPerClick = 1 + rebirths; // +1 points per click with each rebirth
-        multiplier = 1;  // Reset multiplier
-        updateDisplay();
-        alert("Rebirth successful! Points per click increased!");
-      } else {
-        alert("Not enough points to rebirth!");
-      }
-    });
-
-    // Initialize display
+  clickButton.addEventListener('click', () => {
+    points += pointsPerClick;
     updateDisplay();
-  </script>
+  });
+
+  buyMultiplierButton.addEventListener('click', () => {
+    if (points >= multiplierCost) {
+      points -= multiplierCost;
+      multiplierCount++;
+      pointsPerClick *= 2;
+      multiplierCost *= 2;
+      updateDisplay();
+    } else {
+      alert("Not enough points for multiplier!");
+    }
+  });
+
+  buyAutoClickerButton.addEventListener('click', () => {
+    if (points >= autoClickerCost) {
+      points -= autoClickerCost;
+      autoClickerCount++;
+      setInterval(() => {
+        points += pointsPerClick;
+        updateDisplay();
+      }, 2000);
+      updateDisplay();
+    } else {
+      alert("Not enough points for auto-clicker!");
+    }
+  });
+
+  rebirthButton.addEventListener('click', () => {
+    const rebirthCost = 10000;
+    if (points >= rebirthCost) {
+      points -= rebirthCost;
+      pointsPerClick++;
+      points = 0;
+      multiplierCount = 0;
+      autoClickerCount = 0;
+      multiplierCost = 50;
+      updateDisplay();
+    } else {
+      alert("Not enough points for rebirth!");
+    }
+  });
+
+  updateDisplay();
+</script>
+
 </body>
 </html>
