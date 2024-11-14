@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Button Clicking Simulator</title>
   <style>
-    /* Gradient background */
+    /* Full-page rotating gradient background */
     body {
       font-family: Arial, sans-serif;
       margin: 0;
@@ -14,13 +14,22 @@
       justify-content: center;
       align-items: center;
       height: 100vh;
-      background: linear-gradient(45deg, #ff6a00, #f44336, #2196f3, #4CAF50);
+      overflow: hidden;
+      background: linear-gradient(45deg, #ff6a00, #f44336, #2196f3, #4CAF50, #ff6a00);
+      background-size: 200% 200%;
       animation: gradientRotate 30s linear infinite;
     }
+    
     @keyframes gradientRotate {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
+      0% {
+        background-position: 0% 50%;
+      }
+      50% {
+        background-position: 100% 50%;
+      }
+      100% {
+        background-position: 0% 50%;
+      }
     }
 
     .container {
@@ -32,7 +41,11 @@
       width: 400px;
     }
 
-    h1 { color: #333; font-size: 2em; }
+    h1 {
+      color: #333;
+      font-size: 2em;
+    }
+    
     button {
       padding: 10px 20px;
       font-size: 16px;
@@ -44,134 +57,17 @@
       transition: transform 0.2s ease, background-color 0.3s;
       margin-top: 15px;
     }
-    button:hover { transform: scale(1.1); background-color: #45a049; }
-    input {
-      padding: 10px;
-      font-size: 16px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-      width: 80px;
-      text-align: center;
-    }
-    p { font-size: 18px; margin-top: 10px; }
-    .horizontal-container {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      margin-top: 10px;
+
+    button:hover {
+      transform: scale(1.1);
+      background-color: #45a049;
     }
   </style>
 </head>
 <body>
-  <div id="introScreen" class="container">
-    <h1>Welcome to Button Clicking Simulator!</h1>
-    <p>Click the button to earn points. You can buy upgrades to increase your points per click or gamble your points.</p>
-    <button id="startButton">Start Game</button>
-  </div>
-
-  <div id="gameContainer" class="container" style="display: none;">
+  <div class="container">
     <h1>Button Clicking Simulator</h1>
-    <p>Current Points: <span id="points">0</span></p>
-    
-    <button id="clickButton">Click to Earn Points</button>
-    <h2>Upgrades</h2>
-    <button id="buyMultiplierButton">Buy Multiplier (Cost: <span id="multiplierCost">50</span>)</button>
-    <button id="buyAutoClickerButton">Buy Auto Clicker (Cost: 200)</button>
-    <h2>Gambling</h2>
-    <div class="horizontal-container">
-      <input type="number" id="betAmount" placeholder="Enter bet amount" min="1">
-      <button id="gambleButton">Gamble</button>
-    </div>
-    <p id="gambleResult"></p>
+    <button>Click Me!</button>
   </div>
-
-  <script>
-    let points = parseInt(localStorage.getItem('points')) || 0;
-    let multiplier = parseInt(localStorage.getItem('multiplier')) || 1;
-    let autoClickerCount = parseInt(localStorage.getItem('autoClickerCount')) || 0;
-
-    const pointsDisplay = document.getElementById('points');
-    const startButton = document.getElementById('startButton');
-    const gameContainer = document.getElementById('gameContainer');
-    const introScreen = document.getElementById('introScreen');
-    const clickButton = document.getElementById('clickButton');
-    const buyMultiplierButton = document.getElementById('buyMultiplierButton');
-    const buyAutoClickerButton = document.getElementById('buyAutoClickerButton');
-    const multiplierCostDisplay = document.getElementById('multiplierCost');
-    const gambleButton = document.getElementById('gambleButton');
-    const betAmountInput = document.getElementById('betAmount');
-    const gambleResult = document.getElementById('gambleResult');
-
-    function saveGameState() {
-      localStorage.setItem('points', points);
-      localStorage.setItem('multiplier', multiplier);
-      localStorage.setItem('autoClickerCount', autoClickerCount);
-    }
-
-    function updateUI() {
-      pointsDisplay.textContent = points;
-      multiplierCostDisplay.textContent = multiplier * 50;
-      saveGameState();
-    }
-
-    startButton.addEventListener('click', () => {
-      introScreen.style.display = 'none';
-      gameContainer.style.display = 'block';
-      updateUI();
-    });
-
-    clickButton.addEventListener('click', () => {
-      points += multiplier;
-      updateUI();
-    });
-
-    buyMultiplierButton.addEventListener('click', () => {
-      const multiplierCost = multiplier * 50;
-      if (points >= multiplierCost) {
-        points -= multiplierCost;
-        multiplier++;
-        updateUI();
-      } else {
-        alert("Not enough points to buy multiplier!");
-      }
-    });
-
-    buyAutoClickerButton.addEventListener('click', () => {
-      const autoClickerCost = 200;
-      if (points >= autoClickerCost) {
-        points -= autoClickerCost;
-        autoClickerCount++;
-        setInterval(() => {
-          points += multiplier;
-          updateUI();
-        }, 2000);
-        updateUI();
-      } else {
-        alert("Not enough points to buy auto clicker!");
-      }
-    });
-
-    gambleButton.addEventListener('click', () => {
-      const betAmount = parseInt(betAmountInput.value);
-      if (isNaN(betAmount) || betAmount <= 0 || betAmount > points) {
-        gambleResult.textContent = "Invalid bet amount!";
-        gambleResult.style.color = "red";
-        return;
-      }
-      points -= betAmount;
-      if (Math.random() < 0.5) {
-        points += betAmount * 2;
-        gambleResult.textContent = `You won! You now have ${points} points!`;
-        gambleResult.style.color = "green";
-      } else {
-        gambleResult.textContent = `You lost ${betAmount} points.`;
-        gambleResult.style.color = "red";
-      }
-      updateUI();
-    });
-
-    updateUI();
-  </script>
 </body>
 </html>
