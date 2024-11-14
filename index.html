@@ -19,20 +19,14 @@
       background-size: 200% 200%;
       animation: gradientRotate 30s linear infinite;
     }
-    
+
     @keyframes gradientRotate {
-      0% {
-        background-position: 0% 50%;
-      }
-      50% {
-        background-position: 100% 50%;
-      }
-      100% {
-        background-position: 0% 50%;
-      }
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
     }
 
-    .container {
+    .container, .intro-container {
       text-align: center;
       background-color: #fff;
       padding: 20px;
@@ -41,11 +35,8 @@
       width: 400px;
     }
 
-    h1 {
-      color: #333;
-      font-size: 2em;
-    }
-    
+    h1 { color: #333; font-size: 2em; }
+
     button {
       padding: 10px 20px;
       font-size: 16px;
@@ -62,12 +53,53 @@
       transform: scale(1.1);
       background-color: #45a049;
     }
+
+    /* Hide the game container initially */
+    #gameContainer { display: none; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Button Clicking Simulator</h1>
-    <button>Click Me!</button>
+  <!-- Intro Screen -->
+  <div id="introScreen" class="intro-container">
+    <h1>Welcome to Button Clicking Simulator!</h1>
+    <p>Click "Start Game" to begin!</p>
+    <button id="startButton">Start Game</button>
   </div>
+
+  <!-- Main Game Container (Hidden initially) -->
+  <div id="gameContainer" class="container">
+    <h1>Button Clicking Simulator</h1>
+    <p>Current Points: <span id="points">0</span></p>
+    <button id="clickButton">Click to Earn Points</button>
+  </div>
+
+  <script>
+    // Initialize variables
+    let points = 0;
+
+    // DOM Elements
+    const startButton = document.getElementById('startButton');
+    const gameContainer = document.getElementById('gameContainer');
+    const introScreen = document.getElementById('introScreen');
+    const pointsDisplay = document.getElementById('points');
+    const clickButton = document.getElementById('clickButton');
+
+    // Function to update points display
+    function updatePoints() {
+      pointsDisplay.textContent = points;
+    }
+
+    // Start Game Button
+    startButton.addEventListener('click', () => {
+      introScreen.style.display = 'none'; // Hide intro screen
+      gameContainer.style.display = 'block'; // Show game container
+    });
+
+    // Click Button to earn points
+    clickButton.addEventListener('click', () => {
+      points += 1;
+      updatePoints();
+    });
+  </script>
 </body>
 </html>
