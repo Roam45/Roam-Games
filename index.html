@@ -104,92 +104,77 @@
     <p id="gambleResult"></p>
 
     <h2>Rebirth</h2>
-    <button id="rebirthButton">Rebirth (Cost: 1,000,000 points)</button>
-    <p>Rebirth Level: <span id="rebirthLevel">0</span></p>
-
-    <p>Multiplier Level: <span id="multiplierLevel">1</span></p>
-    <p>Auto-Clickers: <span id="autoClickerCount">0</span></p>
+    <p>Rebirth Cost: 10,000 points</p>
+    <button id="rebirthButton">Rebirth</button>
   </div>
 
   <script>
-    // Load saved data or set default values
+    // Initialize game variables
     let points = parseInt(localStorage.getItem('points')) || 0;
-    let multiplierLevel = parseInt(localStorage.getItem('multiplierLevel')) || 1;
-    let autoClickerCount = parseInt(localStorage.getItem('autoClickerCount')) || 0;
-    let rebirthLevel = parseInt(localStorage.getItem('rebirthLevel')) || 0;
-    let pointsPerClick = (rebirthLevel + 1) * multiplierLevel;
-    let multiplierCost = 50;
+    let multiplier = parseInt(localStorage.getItem('multiplier')) || 1;
+    let pointsPerClick = parseInt(localStorage.getItem('pointsPerClick')) || 1;
+    let rebirths = parseInt(localStorage.getItem('rebirths')) || 0;
 
     // DOM Elements
-    const startButton = document.getElementById('startButton');
-    const gameContainer = document.getElementById('gameContainer');
-    const introScreen = document.getElementById('introScreen');
     const pointsDisplay = document.getElementById('points');
+    const multiplierCostDisplay = document.getElementById('multiplierCost');
     const clickButton = document.getElementById('clickButton');
+    const buyMultiplierButton = document.getElementById('buyMultiplier');
+    const buyAutoClickerButton = document.getElementById('buyAutoClicker');
     const gambleButton = document.getElementById('gambleButton');
     const betAmountInput = document.getElementById('betAmount');
     const gambleResult = document.getElementById('gambleResult');
-    const buyMultiplierButton = document.getElementById('buyMultiplier');
-    const buyAutoClickerButton = document.getElementById('buyAutoClicker');
     const rebirthButton = document.getElementById('rebirthButton');
-    const multiplierLevelDisplay = document.getElementById('multiplierLevel');
-    const autoClickerCountDisplay = document.getElementById('autoClickerCount');
-    const rebirthLevelDisplay = document.getElementById('rebirthLevel');
-    const multiplierCostDisplay = document.getElementById('multiplierCost');
+    const startButton = document.getElementById('startButton');
+    const gameContainer = document.getElementById('gameContainer');
+    const introScreen = document.getElementById('introScreen');
 
-    // Update display for points and items
+    // Update points and multiplier display
     function updateDisplay() {
       pointsDisplay.textContent = points;
-      multiplierLevelDisplay.textContent = multiplierLevel;
-      autoClickerCountDisplay.textContent = autoClickerCount;
-      rebirthLevelDisplay.textContent = rebirthLevel;
-      multiplierCostDisplay.textContent = multiplierCost;
+      multiplierCostDisplay.textContent = 50 * Math.pow(2, rebirths);  // Double the multiplier cost after each rebirth
       localStorage.setItem('points', points);
-      localStorage.setItem('multiplierLevel', multiplierLevel);
-      localStorage.setItem('autoClickerCount', autoClickerCount);
-      localStorage.setItem('rebirthLevel', rebirthLevel);
+      localStorage.setItem('multiplier', multiplier);
+      localStorage.setItem('pointsPerClick', pointsPerClick);
+      localStorage.setItem('rebirths', rebirths);
     }
 
-    // Start Game Button
+    // Start game
     startButton.addEventListener('click', () => {
       introScreen.style.display = 'none';
       gameContainer.style.display = 'block';
       updateDisplay();
     });
 
-    // Click Button to earn points
+    // Click to earn points
     clickButton.addEventListener('click', () => {
       points += pointsPerClick;
       updateDisplay();
     });
 
-    // Buy Multiplier
+    // Buy multiplier
     buyMultiplierButton.addEventListener('click', () => {
+      const multiplierCost = 50 * Math.pow(2, rebirths);
       if (points >= multiplierCost) {
         points -= multiplierCost;
-        multiplierLevel++;
-        pointsPerClick = (rebirthLevel + 1) * multiplierLevel;
-        multiplierCost *= 2; // Each purchase doubles the cost
+        multiplier *= 2;
         updateDisplay();
       } else {
-        alert("Not enough points to buy multiplier!");
+        alert("Not enough points for multiplier!");
       }
     });
 
-    // Buy Auto-Clicker
+    // Buy auto-clicker (not implemented in full, but could be expanded)
     buyAutoClickerButton.addEventListener('click', () => {
-      const autoClickerCost = 100;
-      if (points >= autoClickerCost) {
-        points -= autoClickerCost;
-        autoClickerCount++;
-        startAutoClickers();
+      if (points >= 100) {
+        points -= 100;
         updateDisplay();
       } else {
-        alert("Not enough points to buy auto-clicker!");
+        alert("Not enough points for auto-clicker!");
       }
     });
 
-    // Gamble Points
+    // Gamble functionality
     gambleButton.addEventListener('click', () => {
       const betAmount = parseInt(betAmountInput.value);
       if (isNaN(betAmount) || betAmount <= 0 || betAmount > points) {
@@ -198,10 +183,12 @@
         return;
       }
       points -= betAmount;
-      const win = Math.random() < 0.5;
+      updateDisplay();
+
+      const win = Math.random() < 0.1;
       if (win) {
         points += betAmount * 2;
-        gambleResult.textContent = `You won! You now have ${points} points!`;
+        gambleResult.textContent = `You won! You now have ${betAmount * 3} points!`;
         gambleResult.style.color = "green";
       } else {
         gambleResult.textContent = `You lost ${betAmount} points.`;
@@ -210,32 +197,22 @@
       updateDisplay();
     });
 
-    // Rebirth function
+    // Rebirth functionality
     rebirthButton.addEventListener('click', () => {
-      const rebirthCost = 1000000;
+      const rebirthCost = 10000;
       if (points >= rebirthCost) {
         points -= rebirthCost;
-        rebirthLevel++;
-
-        // Double multiplier and reset points per click based on rebirth level
-        pointsPerClick = (rebirthLevel + 1) * multiplierLevel * 2; // Doubling the points per click
-        multiplierCost = 50 * Math.pow(2, rebirthLevel); // Double multiplier cost with each rebirth
-        multiplierLevel = 1; // Reset multiplier level
-        autoClickerCount = 0; // Reset auto-clickers
-
+        rebirths++;
+        pointsPerClick = 1 + rebirths; // +1 points per click with each rebirth
+        multiplier = 1;  // Reset multiplier
         updateDisplay();
+        alert("Rebirth successful! Points per click increased!");
       } else {
         alert("Not enough points to rebirth!");
       }
     });
 
-    // Start auto-clickers
-    function startAutoClickers() {
-      setInterval(() => {
-        points += pointsPerClick;
-        updateDisplay();
-      }, 2000); // Auto-click every 2 seconds
-    }
+    updateDisplay();  // Initialize display
   </script>
 </body>
 </html>
